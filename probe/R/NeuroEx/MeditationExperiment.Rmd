@@ -1,0 +1,122 @@
+---
+title: "Meditation Experiment with NeuroExperimenter"
+author: "Fred Mellender"
+date: "Saturday, December 27, 2014"
+output: word_document
+---
+
+```{r}
+require("knitr")
+#opts_chunk$set(eval=FALSE)  #evaluate nothing
+```
+###Read and clean the data
+```{r readData}
+
+half <- read.table("./half.Rdata.txt", header=T, na.strings="NA")  #first half: baseline, then meditation
+
+clean <- function(df) {  #eliminate useless columns
+  df$class <- NULL
+  df$Blink <- NULL
+  df$time <- NULL
+  df <- df[complete.cases(df),]  #retain only those rows that have NO NA's in them
+  df
+}
+
+half <- clean(half)
+```
+###Normalize the data
+Divide the raw data from the log by the normalizing "totPower", just as we do in NEx:      
+
+```{r normalize}
+totPower <- function(df) { df$Delta+df$Theta+df$Alpha1+df$Alpha2+df$Beta1+df$Beta2+df$Gamma1+df$Gamma2}
+
+normal <- function(df) {
+  foo <- df
+  sums <- totPower(df)
+  foo <- sqrt(df/sums)  #normalization of the power data (and Meditation/Attention, incorrectly)
+  foo$Meditation <- df$Meditation/100.0   #do the Meditation normalization correctly.
+  foo$Attention <- df$Attention/100.0
+  data.frame(df=foo, sums=sums)   # return a new dataframe that includes the totPwr
+}
+normHalf <- normal(half)
+head(normHalf, 2)   #show the first two rows of the normalized data
+```
+       
+To do the test for significance we need to see that the normalized data it not too far from a normal distribtuion.      
+          
+          
+    
+```{r checkNormal}
+qqnorm(normHalf$df.Gamma1)
+```
+       
+The near-straight line suggest normality.
+      
+Add a class variable to distinguish  baseline from mediation observations.
+The meditation observations begin at row 1055 
+
+```{r setClass}
+normHalf$class <- "base"
+lastHalf <- 1055:nrow(normHalf)
+normHalf[lastHalf,]$class <- "med"
+normHalf$class <- as.factor(normHalf$class)
+
+```
+  
+Setup Derived formula and apply it to get another column to discriminate on.  Split the dataFrame normHalf into two new ones (the baseline and meditation data).  
+ 
+ 
+```{r}
+normHalf$funct <- (normHalf$df.Gamma1 + normHalf$df.Gamma2)/normHalf$df.Delta
+base <- normHalf[1:1054,]
+med <- normHalf[lastHalf,]
+```
+    
+###Explore the data.
+We redo the NEx calculations in R to verify R and NEx match in their logic.
+```{r explore}
+head(base, 2) # just show the first two rows of the data frame for the base data
+baseAvg <- apply(base[,1:10],2,mean)  #get the averages of the first 10 cols of base
+medAvg <- apply(med[,1:10],2,mean)   #... and of meditation
+medAvg/baseAvg                  # get the ratios, just as in NEx Summary graph page
+mean(base$funct>=1.8)           # get the % passed of the baseline data
+mean(med$funct>=1.8)            # get the % passed of the meditation data
+boxplot(funct  ~ class, outline=F, data = normHalf)  #get the boxblot like that on performance page
+```
+     
+This verifies that we get the same results with the formula that we got via NEx.    
+Now eliminate the sums, funct, Attention, Meditation columns from normHalf so we can do machine learning on what's left.
+   
+```{r}
+normHalf$sums <- NULL
+normHalf$functs <- NULL
+normHalf$df.Attention <- NULL
+normHalf$df.Meditation <- NULL
+```
+
+###Divide into training and test sets.     
+We will train on the trainX set and evaluate on the data we held out from training (testX).    
+
+```{r split}
+library(caret)
+inTrain <- createDataPartition(y=normHalf$class, p=0.75, list=FALSE)
+trainX <- normHalf[inTrain,]
+testX <- normHalf[-inTrain,]
+```
+
+###Train a random forest model.  
+We train on trainX part we extracted from normHalf.   
+
+```{r makeModel}
+model <- train(class ~ ., method="rf", data=trainX)  #random forest, which is also the default method.
+print(model)
+```
+
+This default model uses random forest and training via bootstrap.  Now we run it against the test data to predict the classes thereof.  We see how well it did via a confusion matrix.    
+
+```{r run rf Model}
+predicts <- predict(model$finalModel, testX) # run against test data
+confusionMatrix(predicts, testX$class)
+
+```
+

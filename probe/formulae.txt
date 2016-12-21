@@ -1,0 +1,5 @@
+a1-a2
+a1
+abs(a1)
+abs(a1-a2)
+abs(a1-b2)
