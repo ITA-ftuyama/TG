@@ -3,6 +3,7 @@ from bluetooth.btcommon import BluetoothError
 import json
 import time
 
+
 def connect_bluetooth_addr(addr):
     for i in range(5):
         if i > 0:
@@ -14,7 +15,10 @@ def connect_bluetooth_addr(addr):
             return sock
         except BluetoothError, e:
             print e
+        except:
+            print 'error'
     return None
+
 
 def connect_magic():
     """ Tries to connect to the first MindWave Mobile it can find.
@@ -26,10 +30,10 @@ def connect_magic():
         The address is then put in a file for later reference.
 
     """
-    nearby_devices = bluetooth.discover_devices(lookup_names = True, duration=5)
+    nearby_devices = bluetooth.discover_devices(lookup_names=True, duration=5)
 
     for addr, name in nearby_devices:
         if name == "MindWave Mobile":
-            print "found"
+            print "Headset found"
             return (connect_bluetooth_addr(addr), addr)
     return (None, "")

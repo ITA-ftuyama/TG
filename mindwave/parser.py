@@ -36,11 +36,15 @@ from datetime import datetime
     processors, like in the Raspberry Pi, so there you would probably derive your own
     parser.
 """
+
+
 def queue_to_series(a, freq="s"):
     t = pd.date_range(end=datetime.now(), freq=freq, periods=len(a))
-    return pd.TimeSeries(a, index=t)
+    return pd.Series(a, index=t)
+
 
 class ThinkGearParser(object):
+
     def __init__(self, recorders=None):
         self.recorders = []
         if recorders is not None:
@@ -55,6 +59,7 @@ class ThinkGearParser(object):
         for recorder in self.recorders:
             recorder.finish_chunk()
         self.input_data += data
+
     def dispatch_data(self, key, value):
         for recorder in self.recorders:
             recorder.dispatch_data(key, value)
@@ -67,9 +72,9 @@ class ThinkGearParser(object):
         times = []
         while 1:
             byte = yield
-            if byte== 0xaa:
-                byte = yield # This byte should be "\aa" too
-                if byte== 0xaa:
+            if byte == 0xaa:
+                byte = yield  # This byte should be "\aa" too
+                if byte == 0xaa:
                     # packet synced by 0xaa 0xaa
                     packet_length = yield
                     packet_code = yield
@@ -86,38 +91,37 @@ class ThinkGearParser(object):
                     else:
                         self.sending_data = True
                         left = packet_length - 2
-                        while left>0:
-                            if packet_code ==0x80: # raw value
+                        while left > 0:
+                            if packet_code == 0x80:  # raw value
                                 row_length = yield
                                 a = yield
                                 b = yield
-                                value = struct.unpack("<h",chr(b)+chr(a))[0]
+                                value = struct.unpack("<h", chr(b)+chr(a))[0]
                                 self.dispatch_data("raw", value)
                                 left -= 2
-                            elif packet_code == 0x02: # Poor signal
+                            elif packet_code == 0x02:  # Poor signal
                                 a = yield
 
                                 left -= 1
-                            elif packet_code == 0x04: # Attention (eSense)
+                            elif packet_code == 0x04:  # Attention (eSense)
                                 a = yield
-                                if a>0:
-                                    v = struct.unpack("b",chr(a))[0]
+                                if a > 0:
+                                    v = struct.unpack("b", chr(a))[0]
                                     if 0 < v <= 100:
                                         self.dispatch_data("attention", v)
-                                left-=1
-                            elif packet_code == 0x05: # Meditation (eSense)
+                                left -= 1
+                            elif packet_code == 0x05:  # Meditation (eSense)
                                 a = yield
-                                if a>0:
-                                    v = struct.unpack("b",chr(a))[0]
+                                if a > 0:
+                                    v = struct.unpack("b", chr(a))[0]
                                     if 0 < v <= 100:
                                         self.dispatch_data("meditation", v)
-                                left-=1
-                                
-                                
-                            elif packet_code == 0x16: # Blink Strength
+                                left -= 1
+
+                            elif packet_code == 0x16:  # Blink Strength
                                 self.current_blink_strength = yield
-                              
-                                left-=1
+
+                                left -= 1
                             elif packet_code == 0x83:
                                 vlength = yield
                                 self.current_vector = []
@@ -127,20 +131,23 @@ class ThinkGearParser(object):
                                     c = yield
                                     value = a*255*255+b*255+c
                                 left -= vlength
-                                self.dispatch_data("bands", self.current_vector)
+                                self.dispatch_data(
+                                    "bands", self.current_vector)
                             packet_code = yield
                 else:
-                    pass # sync failed
+                    pass  # sync failed
             else:
-                pass # sync failed
+                pass  # sync failed
+
 
 class TimeSeriesRecorder:
+
     def __init__(self, file_name=None):
-        self.meditation = pd.TimeSeries()
-        self.attention = pd.TimeSeries()
-        self.raw = pd.TimeSeries()
-        self.blink = pd.TimeSeries()
-        self.poor_signal = pd.TimeSeries()
+        self.meditation = pd.Series()
+        self.attention = pd.Series()
+        self.raw = pd.Series()
+        self.blink = pd.Series()
+        self.poor_signal = pd.Series()
         self.attention_queue = []
         self.meditation_queue = []
         self.poor_signal_queue = []
@@ -150,44 +157,48 @@ class TimeSeriesRecorder:
             self.store = pd.HDFStore(file_name)
         else:
             self.store = None
- 
+
     def dispatch_data(self, key, value):
         if key == "attention":
             self.attention_queue.append(value)
             # Blink and "poor signal" is only sent when a blink or poor signal is detected
             # So fake continuous signal as zeros.
-            
+
             self.blink_queue.append(0)
             self.poor_signal_queue.append(0)
-            
+
         elif key == "meditation":
             self.meditation_queue.append(value)
         elif key == "raw":
             self.raw_queue.append(value)
         elif key == "blink":
             self.blink_queue.append(value)
-            if len(self.blink_queue)>0:
+            if len(self.blink_queue) > 0:
                 self.blink_queue[-1] = self.current_blink_strength
- 
+
         elif key == "poor_signal":
-            if len(self.poor_signal_queue)>0:
+            if len(self.poor_signal_queue) > 0:
                 self.poor_signal_queue[-1] = a
 
-        
     def record_meditation(self, attention):
         self.meditation_queue.append()
-        
+
     def record_blink(self, attention):
         self.blink_queue.append()
-    
+
     def finish_chunk(self):
         """ called periodically to update the timeseries """
-        self.meditation = pd.concat([self.meditation, queue_to_series(self.meditation_queue, freq="s")])
-        
-        self.attention = pd.concat([self.attention, queue_to_series(self.attention_queue, freq="s")])
-        self.blink = pd.concat([self.blink, queue_to_series(self.blink_queue, freq="s")])
-        self.raw = pd.concat([self.raw, queue_to_series(self.raw_queue, freq="1953U")])
-        self.poor_signal = pd.concat([self.poor_signal, queue_to_series(self.poor_signal_queue)])
+        self.meditation = pd.concat(
+            [self.meditation, queue_to_series(self.meditation_queue, freq="s")])
+
+        self.attention = pd.concat(
+            [self.attention, queue_to_series(self.attention_queue, freq="s")])
+        self.blink = pd.concat(
+            [self.blink, queue_to_series(self.blink_queue, freq="s")])
+        self.raw = pd.concat(
+            [self.raw, queue_to_series(self.raw_queue, freq="1953U")])
+        self.poor_signal = pd.concat(
+            [self.poor_signal, queue_to_series(self.poor_signal_queue)])
 
         self.attention_queue = []
         self.meditation_queue = []
@@ -198,4 +209,3 @@ class TimeSeriesRecorder:
             self.store['attention'] = self.attention
             self.store['meditation'] = self.meditation
             self.store['raw'] = self.raw
-

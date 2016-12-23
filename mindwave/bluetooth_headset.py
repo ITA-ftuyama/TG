@@ -34,6 +34,6 @@ def connect_magic():
 
     for addr, name in nearby_devices:
         if name == "MindWave Mobile":
-            print "found"
+            print "Headset found"
             return (connect_bluetooth_addr(addr), addr)
     return (None, "")
