@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Led Controller."""
+"""Arm Controller."""
 from serialcom.data_serial import DataSerial
 
 
@@ -12,13 +12,14 @@ class Controller:
         """Try openning new serial."""
         self.serial = DataSerial()
 
-    def control_arm(self, number):
+    def control_arm(self, command):
         """Control Led using serial."""
         if self.serial:
-            self.serial.send_ser(number)
+            for number in command:
+                self.serial.send_ser(number)
 
     def close(self):
         """Close serial."""
-        self.serial.close_ser()
+        if self.serial:
+            self.serial.close_ser()
 
-Controller()

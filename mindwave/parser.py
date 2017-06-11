@@ -68,7 +68,6 @@ class ThinkGearParser(object):
         """
             This generator parses one byte at a time.
         """
-        i = 1
         times = []
         while 1:
             byte = yield
@@ -119,7 +118,9 @@ class ThinkGearParser(object):
                                 left -= 1
 
                             elif packet_code == 0x16:  # Blink Strength
-                                self.current_blink_strength = yield
+                                self.current_blink_strength = yield 
+                                if self.current_blink_strength > 0: 
+                                    self.dispatch_data("blink", self.current_blink_strength) 
 
                                 left -= 1
                             elif packet_code == 0x83:
@@ -173,18 +174,10 @@ class TimeSeriesRecorder:
             self.raw_queue.append(value)
         elif key == "blink":
             self.blink_queue.append(value)
-            if len(self.blink_queue) > 0:
-                self.blink_queue[-1] = self.current_blink_strength
 
         elif key == "poor_signal":
             if len(self.poor_signal_queue) > 0:
                 self.poor_signal_queue[-1] = a
-
-    def record_meditation(self, attention):
-        self.meditation_queue.append()
-
-    def record_blink(self, attention):
-        self.blink_queue.append()
 
     def finish_chunk(self):
         """ called periodically to update the timeseries """

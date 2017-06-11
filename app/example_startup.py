@@ -23,7 +23,7 @@ def mindwave_startup(description="", extra_args=[]):
     if args.address is None:
         socket = None
         retries = 0
-        while socket is None and retries < 3:
+        while socket is None and retries < 1:
             try:
                 socket, socket_addr = connect_magic()
             except:

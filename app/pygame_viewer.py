@@ -6,7 +6,8 @@ from mindwave.pyeeg import bin_power
 from mindwave.parser import ThinkGearParser, TimeSeriesRecorder
 from mindwave.bluetooth_headset import BluetoothError
 from example_startup import mindwave_startup
-from controllers.led_controller import Controller as LedController
+from controllers.controller import Controller
+from random import randint
 from numpy import *
 from pygame import *
 
@@ -14,7 +15,7 @@ from pygame import *
 description = """Pygame Example
 """
 
-led_controller = LedController()
+controller = Controller('led')
 socket, args = mindwave_startup(description=description)
 recorder = TimeSeriesRecorder()
 parser = ThinkGearParser(recorders=[recorder])
@@ -28,6 +29,8 @@ thetaColor  = pygame.Color(0, 0, 255)
 alphaColor  = pygame.Color(255, 0, 0)
 betaColor   = pygame.Color(0, 255, 00)
 gammaColor  = pygame.Color(0, 255, 255)
+
+mock = True
 
 
 def wave_color(freq):
@@ -46,21 +49,39 @@ def wave_color(freq):
 
 def print_attention(window, recorder):
     """Print attention level."""
-    pygame.draw.circle(
-        window, redColor, (800, 200), int(recorder.attention[-1] / 2))
-    pygame.draw.circle(window, greenColor, (800, 200), 60 / 2, 1)
-    pygame.draw.circle(window, greenColor, (800, 200), 100 / 2, 1)
-    window.blit(attention_img, (760, 260))
+    try:
+        pygame.draw.circle(
+            window, redColor, (800, 200), int(recorder.attention[-1] / 2))
+        pygame.draw.circle(window, greenColor, (800, 200), 60 / 2, 1)
+        pygame.draw.circle(window, greenColor, (800, 200), 100 / 2, 1)
+        window.blit(attention_img, (760, 260))
+    except:
+        return
 
 
 def print_meditation(window, recorder):
     """Print meditation level."""
-    pygame.draw.circle(
-        window, redColor, (700, 200), int(recorder.meditation[-1] / 2))
-    pygame.draw.circle(window, greenColor, (700, 200), 60 / 2, 1)
-    pygame.draw.circle(window, greenColor, (700, 200), 100 / 2, 1)
+    try:
+        pygame.draw.circle(
+            window, redColor, (650, 200), int(recorder.meditation[-1] / 2))
+        pygame.draw.circle(window, greenColor, (650, 200), 60 / 2, 1)
+        pygame.draw.circle(window, greenColor, (650, 200), 100 / 2, 1)
 
-    window.blit(meditation_img, (600, 260))
+        window.blit(meditation_img, (600, 260))
+    except:
+        return
+
+def print_blink(window, recorder):
+    """Print blink level."""
+    try:
+        pygame.draw.circle(
+            window, redColor, (500, 200), int(recorder.blink[-1] / 2))
+        pygame.draw.circle(window, greenColor, (500, 200), 60 / 2, 1)
+        pygame.draw.circle(window, greenColor, (500, 200), 100 / 2, 1)
+
+        window.blit(blink_img, (460, 260))
+    except:
+        return
 
 
 def print_spectrum(window, spectrum, flen):
@@ -95,10 +116,19 @@ def print_disconnection(window, font):
         "Mindwave not detected...", False, whiteColor)
     window.blit(img, (100, 100))
 
+def has_recorded():
+    return len(recorder.attention) > 0 or len(recorder.meditation) > 0 or len(recorder.blink) > 0
+
+def mock_data():
+    parser.feed(chr(0xaa) + chr(0xaa) + chr(3) + chr(0x80) + chr(3) + chr(0) + chr(randint(0,100)) + chr(0x00))
+    parser.feed(chr(0xaa) + chr(0xaa) + chr(3) + chr(0x04) + chr(randint(0,100)) + chr(0x00))
+    parser.feed(chr(0xaa) + chr(0xaa) + chr(3) + chr(0x05) + chr(randint(0,100)) + chr(0x00))
+    parser.feed(chr(0xaa) + chr(0xaa) + chr(3) + chr(0x16) + chr(randint(0,100)) + chr(0x00))
+
 
 def main():
     """Main loop capture."""
-    global meditation_img, attention_img
+    global meditation_img, attention_img, blink_img
 
     pygame.init()
 
@@ -115,17 +145,19 @@ def main():
 
     meditation_img = font.render("Meditation", False, redColor)
     attention_img = font.render("Attention", False, redColor)
+    blink_img = font.render("Blink", False, redColor)
 
     quit = False
-    while quit is False:
+    while quit is False:   
         try:
             if socket is not None:
                 data = socket.recv(10000)
                 parser.feed(data)
         except BluetoothError:
             pass
+        if mock: mock_data()
         window.blit(background_img, (0, 0))
-        if len(recorder.attention) > 0:
+        if has_recorded():
             flen = 50
             if len(recorder.raw) >= 500:
                 spectrum, relative_spectrum = bin_power(
@@ -140,8 +172,9 @@ def main():
                 pass
             print_attention(window, recorder)
             print_meditation(window, recorder)
+            print_blink(window, recorder)
 
-            led_controller.control_led(int(recorder.attention[-1] / 2))
+            # controller.control(recorder)
 
             """if len(parser.current_vector)>7:
                 m = max(p.current_vector)
@@ -173,4 +206,4 @@ if __name__ == '__main__':
         main()
     finally:
         pygame.quit()
-        led_controller.close()
+        controller.close()

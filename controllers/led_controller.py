@@ -19,6 +19,5 @@ class Controller:
 
     def close(self):
         """Close serial."""
-        self.serial.close_ser()
-
-Controller()
+        if self.serial:
+            self.serial.close_ser()
