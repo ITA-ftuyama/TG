@@ -6,7 +6,7 @@ from mindwave.pyeeg import bin_power
 from mindwave.parser import ThinkGearParser, TimeSeriesRecorder
 from mindwave.bluetooth_headset import BluetoothError
 from example_startup import mindwave_startup
-from led_controller import Controller
+from controllers.led_controller import Controller as LedController
 from numpy import *
 from pygame import *
 
@@ -14,19 +14,20 @@ from pygame import *
 description = """Pygame Example
 """
 
-controller = Controller()
+led_controller = LedController()
 socket, args = mindwave_startup(description=description)
 recorder = TimeSeriesRecorder()
 parser = ThinkGearParser(recorders=[recorder])
 
-blackColor = pygame.Color(0, 0, 0)
-redColor = pygame.Color(255, 0, 0)
-greenColor = pygame.Color(0, 255, 0)
-deltaColor = pygame.Color(100, 0, 0)
-thetaColor = pygame.Color(0, 0, 255)
-alphaColor = pygame.Color(255, 0, 0)
-betaColor = pygame.Color(0, 255, 00)
-gammaColor = pygame.Color(0, 255, 255)
+blackColor  = pygame.Color(0, 0, 0)
+whiteColor  = pygame.Color(255, 255, 255)
+redColor    = pygame.Color(255, 0, 0)
+greenColor  = pygame.Color(0, 255, 0)
+deltaColor  = pygame.Color(100, 0, 0)
+thetaColor  = pygame.Color(0, 0, 255)
+alphaColor  = pygame.Color(255, 0, 0)
+betaColor   = pygame.Color(0, 255, 00)
+gammaColor  = pygame.Color(0, 255, 255)
 
 
 def wave_color(freq):
@@ -88,6 +89,13 @@ def print_nothing(window, font):
     window.blit(img, (100, 100))
 
 
+def print_disconnection(window, font):
+    """Device not detected."""
+    img = font.render(
+        "Mindwave not detected...", False, whiteColor)
+    window.blit(img, (100, 100))
+
+
 def main():
     """Main loop capture."""
     global meditation_img, attention_img
@@ -99,7 +107,7 @@ def main():
     window = pygame.display.set_mode((1280, 720))
     pygame.display.set_caption("Mindwave Viewer")
 
-    background_img = pygame.image.load("pygame_background.png")
+    background_img = pygame.image.load("assets/pygame_background.png")
 
     font = pygame.font.Font("freesansbold.ttf", 20)
     raw_eeg = True
@@ -111,8 +119,9 @@ def main():
     quit = False
     while quit is False:
         try:
-            data = socket.recv(10000)
-            parser.feed(data)
+            if socket is not None:
+                data = socket.recv(10000)
+                parser.feed(data)
         except BluetoothError:
             pass
         window.blit(background_img, (0, 0))
@@ -132,7 +141,7 @@ def main():
             print_attention(window, recorder)
             print_meditation(window, recorder)
 
-            controller.control_led(int(recorder.attention[-1] / 2))
+            led_controller.control_led(int(recorder.attention[-1] / 2))
 
             """if len(parser.current_vector)>7:
                 m = max(p.current_vector)
@@ -145,6 +154,9 @@ def main():
                     (600+i*30,450-value, 6,value))"""
             if raw_eeg:
                 print_eeg(window, recorder)
+        elif socket is None:
+            print_disconnection(window, font)
+            pass
         else:
             print_nothing(window, font)
             pass
@@ -161,4 +173,4 @@ if __name__ == '__main__':
         main()
     finally:
         pygame.quit()
-        controller.close()
+        led_controller.close()

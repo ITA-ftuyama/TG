@@ -25,12 +25,12 @@ pairing mode first.
 
 """
 if __name__ == '__main__':
-    extra_args=[dict(name='measure', type=str, nargs='?',
-            const="attention", default="attention",
-            help="""Measure you want feedback on. Either "meditation"
+    extra_args = [dict(name='measure', type=str, nargs='?',
+                       const="attention", default="attention",
+                       help="""Measure you want feedback on. Either "meditation"
             or "attention\"""")]
     socket, args = mindwave_startup(description=description,
-                              extra_args=extra_args)
+                                    extra_args=extra_args)
 
     if args.measure not in ["attention", "meditation"]:
         print "Unknown measure %s" % repr(args.measure)
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     recorder = TimeSeriesRecorder()
     parser = ThinkGearParser(recorders=[recorder])
 
-    if args.measure== 'attention':
+    if args.measure == 'attention':
         measure_name = 'Attention'
     else:
         measure_name = 'Meditation'
@@ -51,12 +51,11 @@ if __name__ == '__main__':
         parser.feed(data)
         v = 0
         if args.measure == 'attention':
-            if len(recorder.attention)>0:
+            if len(recorder.attention) > 0:
                 v = recorder.attention[-1]
         if args.measure == 'meditation':
-            if len(recorder.meditation)>0:
+            if len(recorder.meditation) > 0:
                 v = recorder.meditation[-1]
-        if v>0:
+        if v > 0:
             bar.start()
             bar.update(v)
-
