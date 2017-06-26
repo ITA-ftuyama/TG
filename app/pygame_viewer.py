@@ -24,6 +24,7 @@ blackColor  = pygame.Color(0, 0, 0)
 whiteColor  = pygame.Color(255, 255, 255)
 redColor    = pygame.Color(255, 0, 0)
 greenColor  = pygame.Color(0, 255, 0)
+blueColor    = pygame.Color(0, 0, 255)
 deltaColor  = pygame.Color(100, 0, 0)
 thetaColor  = pygame.Color(0, 0, 255)
 alphaColor  = pygame.Color(255, 0, 0)
@@ -92,15 +93,32 @@ def print_spectrum(window, spectrum, flen):
         pygame.draw.rect(
             window, color, (25 + i * 10, 400 - value, 5, value))
 
+def print_board(window):
+    """Print EEG board."""
+    pygame.draw.line(window, blueColor, (25,   500), (1025, 500))
+    pygame.draw.line(window, blueColor, (25,   400), (1025, 400))
+    pygame.draw.line(window, blueColor, (25,   600), (1025, 600))
+    pygame.draw.line(window, blueColor, (25,   400), (25,   600))
+    pygame.draw.line(window, blueColor, (1025, 400), (1025, 600))
+
 
 def print_eeg(window, recorder):
     """Print EEG record."""
     lv = 0
     for i, value in enumerate(recorder.raw[-1000:]):
-        v = value / 2.0
+        v = value / 5.0
         pygame.draw.line(
             window, redColor, (i + 25, 500 - lv), (i + 25, 500 - v))
         lv = v
+
+
+def print_waves(window, font):
+    """Print word on screen."""
+    window.blit(font.render("Delta", False, deltaColor), (25,  400))
+    window.blit(font.render("Theta", False, thetaColor), (50,  425))
+    window.blit(font.render("Alpha", False, alphaColor), (100, 400))
+    window.blit(font.render("Beta",  False, betaColor),  (150, 425))
+    window.blit(font.render("Gamma", False, gammaColor), (350, 400))
 
 
 def print_nothing(window, font):
@@ -173,8 +191,9 @@ def main():
             print_attention(window, recorder)
             print_meditation(window, recorder)
             print_blink(window, recorder)
+            print_waves(window, font)
 
-            # controller.control(recorder)
+            controller.control(recorder)
 
             """if len(parser.current_vector)>7:
                 m = max(p.current_vector)
@@ -186,6 +205,7 @@ def main():
                     pygame.draw.rect(window, redColor,
                     (600+i*30,450-value, 6,value))"""
             if raw_eeg:
+                print_board(window)
                 print_eeg(window, recorder)
         elif socket is None:
             print_disconnection(window, font)

@@ -1,5 +1,5 @@
 int incomingByte = 0;
-int ledPin = 13;
+int ledPin = 11;
 String inString;
 int number;
  
@@ -17,7 +17,6 @@ void send_numbers(){
 }
  
 void loop(){
-
     // Read data
     int inChar = Serial.read();
     if (isDigit(inChar)) {
@@ -26,10 +25,10 @@ void loop(){
       analogWrite(ledPin, 0);
     } else if (inChar == '\n') {
       int number = inString.toInt();
-      number = number / 10;
+      //number = number / 10;
       analogWrite(ledPin, number);
+      Serial.println(number);
       inString = "";
     }
-
     delay(10);
 }

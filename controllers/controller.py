@@ -10,21 +10,27 @@ class Controller:
 
     def __init__(self, kind):
         """Creates new controller."""
+        port = '/dev/ttyACM1'
+        self.kind = kind
         if kind == 'led':
-            self.controller = LedController()
+            self.controller = LedController(port)
         if kind == 'arm':
-            self.controller = ArmController()
+            self.controller = ArmController(port)
 
     def control(self, recorder):
         """Control using recorder."""
-        attention  = int(recorder.attention[-1] / 2)
-        meditation = int(recorder.meditation[-1] / 2)
-        blink      = int(recorder.blink[-1] / 2)
+        try:
+            attention  = int(recorder.attention[-1] / 2)
+            meditation = int(recorder.meditation[-1] / 2)
+            blink      = int(recorder.blink[-1] / 2)
 
-        if control == 'led':
-            self.controller.control_led(attention)
-        if control == 'arm':
-            self.controller.control_led([attention, meditation, blink])
+            if self.kind == 'led':
+                self.controller.control_led(attention)
+            if self.kind == 'arm':
+                self.controller.control_led([attention, meditation, blink])
+        except:
+            pass
+
 
     def close(self):
         """Close controller."""
