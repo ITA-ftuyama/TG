@@ -1,11 +1,12 @@
 int incomingByte = 0;
-int ledPin = 11;
+int ledPin = 13;
 String inString;
 int number;
  
 void setup(){
   Serial.begin(9600);
   pinMode(ledPin, OUTPUT);
+  analogWrite(ledPin, 0);
 }
 
 void send_numbers(){
