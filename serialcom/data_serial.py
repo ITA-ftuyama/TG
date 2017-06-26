@@ -10,11 +10,11 @@ class DataSerial:
     """Serial communication."""
     limit = 50
 
-    def __init__(self):
+    def __init__(self, port):
         """Initialize serial."""
         try:
-            self.ser = serial.Serial('COM3', 9600, timeout=0)
-            print "Connected to serial COM3"
+            self.ser = serial.Serial(port, 9600, timeout=0)
+            print "Connected to serial " + port
         except Exception as e:
             print "Could not connect to serial"
             print str(e)

@@ -30,7 +30,7 @@ alphaColor  = pygame.Color(255, 0, 0)
 betaColor   = pygame.Color(0, 255, 00)
 gammaColor  = pygame.Color(0, 255, 255)
 
-mock = True
+mock = False
 
 
 def wave_color(freq):
