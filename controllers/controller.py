@@ -10,7 +10,7 @@ class Controller:
 
     def __init__(self, kind):
         """Creates new controller."""
-        port = '/dev/ttyACM1'
+        port = '/dev/ttyACM0'
         self.kind = kind
         if kind == 'led':
             self.controller = LedController(port)
