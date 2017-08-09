@@ -1,0 +1,13 @@
+adium-theme-ubuntu==0.3.4
+ccsm==0.9.12.2
+compizconfig-python==0.9.12.2
+numpy==1.13.1
+pandas==0.20.3
+PyBluez==0.22
+pygame==1.9.3
+pygobject==3.20.0
+pyserial==3.4
+python-dateutil==2.6.1
+pytz==2017.2
+six==1.10.0
+unity-lens-photos==1.0
