@@ -8,14 +8,14 @@ class Controller:
 
     """Controller Facade."""
 
-    def __init__(self, kind):
+    def __init__(self, view, kind):
         """Creates new controller."""
         port = '/dev/ttyACM0'
         self.kind = kind
         if kind == 'led':
-            self.controller = LedController(port)
+            self.controller = LedController(view, port)
         if kind == 'arm':
-            self.controller = ArmController(port)
+            self.controller = ArmController(view, port)
 
     def control(self, recorder):
         """Control using recorder."""

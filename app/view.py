@@ -20,11 +20,12 @@ gammaColor  = pygame.Color("#00AAAA")
 
 # GUI pallete
 backColor    = pygame.Color("#466666")
-titleColor   = pygame.Color("#330000")
+titleColor   = pygame.Color("#660000")
 
 # Fonts
+font_14 = pygame.font.Font("freesansbold.ttf", 14)
 font_20 = pygame.font.Font("freesansbold.ttf", 20)
-font_28 = pygame.font.Font("freesansbold.ttf", 28)
+font_32 = pygame.font.Font("freesansbold.ttf", 32)
 
 # Words
 meditation_img = font_20.render("Meditation", False, redColor)
@@ -35,35 +36,39 @@ blink_img      = font_20.render("Blink", False, redColor)
 class View(object):
 
     def __init__(self):
-        self.window = pygame.display.set_mode((1200, 800))
+        self.window = pygame.display.set_mode((1200, 700))
         self.bd = [[25, 1025], [400, 600, 500]]
         pygame.display.set_caption("Mindwave Viewer")
+        self.messages = {
+            "bluetooth": [],
+            "serial": [],
+            "status": [],
+            "sser_data": []
+        }
 
     def gui(self):
         self.window.fill(backColor)
-        self.window.blit(
-            font_28.render("Mindwave Controller", False, titleColor), 
-            (50, 50))
+        self.window.blit(font_32.render("Mindwave Controller", False, titleColor), (50, 50))
 
-    def print_message(self, message):
-        """Print some message."""
-        font = font_20
-        color = whiteColor
-        position = (100, 100)
+    def print_message(self, message, kind):
+        """Print some messages."""
+        if message is not None:
+            self.messages[kind].append(message)
 
-        if message == "disconnection":
-            message = "Mindwave not detected..."
-        elif message == "nothing":
-            message = "Not receiving any data from mindwave..."
-            color = redColor
-        else:
-            position = (50, 100)
+        self.window.blit(font_20.render(", ".join(self.messages["bluetooth"]),  False, blueColor),  (50, 100))
+        self.window.blit(font_20.render(", ".join(self.messages["serial"]),     False, redColor),   (50, 125))
+        self.window.blit(font_20.render(", ".join(self.messages["status"]),     False, whiteColor), (50, 150))
+        self.window.blit(font_14.render("Sent Serial: " + "; ".join(self.messages["sser_data"]),   False, redColor),   (50, 175))
 
-        self.window.blit(font.render(message, False, color), position)
+    def add_message(self, message, kind):
+        """Add some messages."""
+        self.messages[kind].append(message)
+        if len(self.messages[kind]) > 10:
+            self.messages[kind].pop(0)
 
-    def flash_message(self, message):
+    def flash_message(self, message, kind):
         self.gui()
-        self.print_message(message)
+        self.print_message(message, kind)
         pygame.display.update()
 
 
@@ -112,34 +117,37 @@ class View(object):
     def print_circle(self, position, value):
         """Print circle on screen."""
         try:
-            pygame.draw.circle(
-                self.window, redColor, position, value)
-            pygame.draw.circle(self.window, greenColor, position, 60 / 2, 1)
-            pygame.draw.circle(self.window, greenColor, position, 100 / 2, 1)
+            pygame.draw.circle(self.window, redColor, position, value)
+            pygame.draw.circle(self.window, greenColor, position, 30, 1)
+            pygame.draw.circle(self.window, greenColor, position, 50, 1)
         except:
             return
 
     def print_waves(self, recorder):
         """Print word on screen."""
         pos_y = 350
+        self.print_message(None, None)
         self.window.blit(font_20.render("Delta", False, deltaColor), (25,  pos_y))
         self.window.blit(font_20.render("Theta", False, thetaColor), (50,  pos_y + 25))
         self.window.blit(font_20.render("Alpha", False, alphaColor), (100, pos_y))
         self.window.blit(font_20.render("Beta",  False, betaColor),  (150, pos_y + 25))
         self.window.blit(font_20.render("Gamma", False, gammaColor), (350, pos_y))
 
-        """Print attention level."""
-        position = (800, 200)
-        self.print_circle(position, int(recorder.attention[-1] / 2))
-        self.window.blit(attention_img, (760, 260))
-
-        """Print meditation level."""
-        position = (650, 200)
-        self.print_circle(position, int(recorder.meditation[-1] / 2))
-        self.window.blit(meditation_img, (600, 260))
+        pos_x = 650
+        pos_y = 200
 
         """Print blink level."""
-        position = (500, 200)
+        position = (pos_x, pos_y)
         self.print_circle(position, int(recorder.blink[-1] / 2))
-        self.window.blit(blink_img, (460, 260))
+        self.window.blit(blink_img, (pos_x - 20, pos_y + 60))
+
+        """Print meditation level."""
+        position = (pos_x + 150, pos_y)
+        self.print_circle(position, int(recorder.meditation[-1] / 2))
+        self.window.blit(meditation_img, (pos_x + 100, pos_y + 60))
+
+        """Print attention level."""
+        position = (pos_x + 300, pos_y)
+        self.print_circle(position, int(recorder.attention[-1] / 2))
+        self.window.blit(attention_img, (pos_x + 260, pos_y + 60))
 

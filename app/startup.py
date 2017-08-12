@@ -27,28 +27,28 @@ def mindwave_startup(view=None, description="", extra_args=[]):
                 socket, socket_addr = connect_magic()
             except:
                 retries += 1
-                view.flash_message("Retrying... {retries}".format(retries=retries))
+                view.flash_message("Retrying... {retries}".format(retries=retries), "bluetooth")
                 time.sleep(1)
         if socket is None:
-            view.flash_message("No MindWave Mobile found.")
+            view.flash_message("No MindWave Mobile found.", "bluetooth")
             return None, None
     else:
         socket = connect_bluetooth_addr(args.address)
         if socket is None:
-            view.flash_message("Connection failed.")
+            view.flash_message("Connection failed.", "bluetooth")
             sys.exit(-1)
         socket_addr = args.address
-    view.flash_message("Connected with MindWave Mobile at %s" % socket_addr)
+    view.flash_message("Connected with MindWave Mobile at %s" % socket_addr, "bluetooth")
     for i in range(5):
         try:
             if i > 0:
-                view.flash_message("Retrying...")
+                view.flash_message("Retrying...", "bluetooth")
             time.sleep(2)
             len(socket.recv(10))
             break
         except BluetoothError, e:
             print e
         if i == 5:
-            view.flash_message("Connection failed.")
+            view.flash_message("Connection failed.", "bluetooth")
             sys.exit(-1)
     return socket, args

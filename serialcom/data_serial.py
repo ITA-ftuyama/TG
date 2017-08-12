@@ -10,26 +10,26 @@ class DataSerial:
     """Serial communication."""
     limit = 50
 
-    def __init__(self, port):
+    def __init__(self, view, port):
         """Initialize serial."""
         try:
+            self.view = view
             self.ser = serial.Serial(port, 9600, timeout=0)
-            print "Connected to serial " + port
+            self.view.print_message("Connected to serial " + port, "serial")
         except Exception as e:
             self.ser = None
-            print "Could not connect to serial"
-            print str(e)
+            self.view.print_message("Could not connect to serial", "serial")
 
     def read_ser(self):
         """Read serial data."""
         while 1:
-            print 'Read: ' + self.ser.readline()
+            self.view.add_message(self.ser.readline(), "rser_data")
             time.sleep(1)
 
     def send_ser(self, num):
         """Send number using serial."""
         y_string = self.string_number(num)
-        #print "Sent: " + y_string,
+        self.view.add_message(y_string, "sser_data")
         self.ser.write(y_string)
 
     def close_ser(self):

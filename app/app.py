@@ -25,12 +25,11 @@ def mock_data(parser):
 
 def main():
     """Main loop capture."""
-    view = View()
-    controller = Controller('led')
-
     recorder = TimeSeriesRecorder()
     parser = ThinkGearParser(recorders=[recorder])
 
+    view = View()
+    controller = Controller(view, 'led')
     socket, args = mindwave_startup(view=view, description="Pygame Example")
     fps_clock = pygame.time.Clock()
 
@@ -45,7 +44,7 @@ def main():
                 data = socket.recv(10000)
                 parser.feed(data)
         except BluetoothError:
-            view.flash_message("Bluetooth Error")
+            view.flash_message("Bluetooth Error", "status")
             pass
         if mock: mock_data(parser)
         view.gui()
@@ -79,10 +78,10 @@ def main():
                 view.print_board()
                 view.print_eeg(recorder)
         elif socket is None:
-            view.print_message("disconnection")
+            view.print_message("Mindwave not detected...", "status")
             pass
         else:
-            view.print_message("nothing")
+            view.print_message("Not receiving any data from mindwave...", "status")
             pass
 
         for event in pygame.event.get():

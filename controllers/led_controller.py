@@ -8,9 +8,9 @@ class Controller:
 
     """Led Controller."""
 
-    def __init__(self, port):
+    def __init__(self, view, port):
         """Try openning new serial."""
-        self.serial = DataSerial(port)
+        self.serial = DataSerial(view, port)
 
     def control_led(self, number):
         """Control Led using serial."""
