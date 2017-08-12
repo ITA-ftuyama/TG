@@ -16,6 +16,7 @@ class DataSerial:
             self.ser = serial.Serial(port, 9600, timeout=0)
             print "Connected to serial " + port
         except Exception as e:
+            self.ser = None
             print "Could not connect to serial"
             print str(e)
 
@@ -33,9 +34,10 @@ class DataSerial:
 
     def close_ser(self):
         """Close serial."""
-        self.ser.write("x")
-        self.ser.flush()
-        self.ser.close()
+        if self.ser:
+            self.ser.write("x")
+            self.ser.flush()
+            self.ser.close()
 
     def string_number(self, y):
         """Cast number to string."""

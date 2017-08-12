@@ -7,8 +7,7 @@ import time
 from mindwave.bluetooth_headset import connect_magic, connect_bluetooth_addr
 from mindwave.bluetooth_headset import BluetoothError
 
-
-def mindwave_startup(description="", extra_args=[]):
+def mindwave_startup(view=None, description="", extra_args=[]):
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('address', type=str, nargs='?',
                         const=None, default=None,
@@ -23,33 +22,33 @@ def mindwave_startup(description="", extra_args=[]):
     if args.address is None:
         socket = None
         retries = 0
-        while socket is None and retries < 1:
+        while socket is None and retries < 2:
             try:
                 socket, socket_addr = connect_magic()
             except:
                 retries += 1
-                print "Retrying... {retries}".format(retries=retries)
+                view.print_message("Retrying... {retries}".format(retries=retries))
                 time.sleep(1)
         if socket is None:
-            print "No MindWave Mobile found."
+            view.print_message("No MindWave Mobile found.")
             return None, None
     else:
         socket = connect_bluetooth_addr(args.address)
         if socket is None:
-            print "Connection failed."
+            view.print_message("Connection failed.")
             sys.exit(-1)
         socket_addr = args.address
     print "Connected with MindWave Mobile at %s" % socket_addr
     for i in range(5):
         try:
             if i > 0:
-                print "Retrying..."
+                view.print_message("Retrying...")
             time.sleep(2)
             len(socket.recv(10))
             break
         except BluetoothError, e:
             print e
         if i == 5:
-            print "Connection failed."
+            view.print_message("Connection failed.")
             sys.exit(-1)
     return socket, args
