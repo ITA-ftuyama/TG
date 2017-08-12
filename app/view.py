@@ -4,6 +4,8 @@
 import pygame
 import struct
 
+pygame.init()
+
 # General Colors
 blackColor  = pygame.Color("#000000")
 whiteColor  = pygame.Color("#FFFFFF")
@@ -28,10 +30,6 @@ font_28 = pygame.font.Font("freesansbold.ttf", 28)
 class View(object):
 
     def __init__(self):
-        pygame.init()
-
-        fps_clock = pygame.time.Clock()
-
         self.window = pygame.display.set_mode((1200, 600))
         pygame.display.set_caption("Mindwave Viewer")
 
@@ -55,6 +53,7 @@ class View(object):
             font_20.render(message, False, whiteColor), 
             (50, 100))
         pygame.display.update()
+
 
     def wave_color(freq):
         """Color according to the wave."""

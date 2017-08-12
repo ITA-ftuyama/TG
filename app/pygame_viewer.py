@@ -38,6 +38,7 @@ def main():
 
     view = View()
     socket, args = mindwave_startup(view=view, description=description)
+    fps_clock = pygame.time.Clock()
 
     raw_eeg = True
     spectra = []
@@ -51,7 +52,7 @@ def main():
         except BluetoothError:
             pass
         if mock: mock_data()
-        window.fill(backColor)
+        view.gui()
         if has_recorded():
             flen = 50
             if len(recorder.raw) >= 500:
@@ -62,13 +63,13 @@ def main():
                     spectra.pop(0)
 
                 spectrum = mean(array(spectra), axis=0)
-                print_spectrum(window, spectrum, flen)
+                #print_spectrum(window, spectrum, flen)
             else:
                 pass
-            print_attention(window, recorder)
-            print_meditation(window, recorder)
-            print_blink(window, recorder)
-            print_waves(window, font)
+            #print_attention(window, recorder)
+            #print_meditation(window, recorder)
+            #print_blink(window, recorder)
+            #print_waves(window, font)
 
             controller.control(recorder)
 
@@ -85,10 +86,10 @@ def main():
                 print_board(window)
                 print_eeg(window, recorder)
         elif socket is None:
-            print_disconnection(window, font)
+            #print_disconnection(window, font)
             pass
         else:
-            print_nothing(window, font)
+            #print_nothing(window, font)
             pass
 
         for event in pygame.event.get():
