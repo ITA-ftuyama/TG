@@ -5,7 +5,7 @@ import pygame
 from mindwave.pyeeg import bin_power
 from mindwave.parser import ThinkGearParser, TimeSeriesRecorder
 from mindwave.bluetooth_headset import BluetoothError
-from example_startup import mindwave_startup
+from startup import mindwave_startup
 from controllers.controller import Controller
 from random import randint
 from numpy import *
@@ -13,19 +13,10 @@ from pygame import *
 from view import View
 
 
-description = """Pygame Example
-"""
-
-controller = Controller('led')
-recorder = TimeSeriesRecorder()
-parser = ThinkGearParser(recorders=[recorder])
-
-mock = False
-
-def has_recorded():
+def has_recorded(recorder):
     return len(recorder.attention) > 0 or len(recorder.meditation) > 0 or len(recorder.blink) > 0
 
-def mock_data():
+def mock_data(parser):
     parser.feed(chr(0xaa) + chr(0xaa) + chr(3) + chr(0x80) + chr(3) + chr(0) + chr(randint(0,100)) + chr(0x00))
     parser.feed(chr(0xaa) + chr(0xaa) + chr(3) + chr(0x04) + chr(randint(0,100)) + chr(0x00))
     parser.feed(chr(0xaa) + chr(0xaa) + chr(3) + chr(0x05) + chr(randint(0,100)) + chr(0x00))
@@ -34,12 +25,16 @@ def mock_data():
 
 def main():
     """Main loop capture."""
-    global meditation_img, attention_img, blink_img
-
     view = View()
-    socket, args = mindwave_startup(view=view, description=description)
+    controller = Controller('led')
+
+    recorder = TimeSeriesRecorder()
+    parser = ThinkGearParser(recorders=[recorder])
+
+    socket, args = mindwave_startup(view=view, description="Pygame Example")
     fps_clock = pygame.time.Clock()
 
+    mock = True
     raw_eeg = True
     spectra = []
 
@@ -50,10 +45,11 @@ def main():
                 data = socket.recv(10000)
                 parser.feed(data)
         except BluetoothError:
+            view.flash_message("Bluetooth Error")
             pass
-        if mock: mock_data()
+        if mock: mock_data(parser)
         view.gui()
-        if has_recorded():
+        if has_recorded(recorder):
             flen = 50
             if len(recorder.raw) >= 500:
                 spectrum, relative_spectrum = bin_power(
@@ -63,14 +59,11 @@ def main():
                     spectra.pop(0)
 
                 spectrum = mean(array(spectra), axis=0)
-                #print_spectrum(window, spectrum, flen)
+                view.print_spectrum(spectrum, flen)
             else:
                 pass
-            #print_attention(window, recorder)
-            #print_meditation(window, recorder)
-            #print_blink(window, recorder)
-            #print_waves(window, font)
 
+            view.print_waves(recorder)
             controller.control(recorder)
 
             """if len(parser.current_vector)>7:
@@ -83,13 +76,13 @@ def main():
                     pygame.draw.rect(window, redColor,
                     (600+i*30,450-value, 6,value))"""
             if raw_eeg:
-                print_board(window)
-                print_eeg(window, recorder)
+                view.print_board()
+                view.print_eeg(recorder)
         elif socket is None:
-            #print_disconnection(window, font)
+            view.print_message("disconnection")
             pass
         else:
-            #print_nothing(window, font)
+            view.print_message("nothing")
             pass
 
         for event in pygame.event.get():
@@ -99,9 +92,11 @@ def main():
         pygame.display.update()
         fps_clock.tick(12)
 
+controller = None
 if __name__ == '__main__':
     try:
         main()
     finally:
         pygame.quit()
-        controller.close()
+        if controller:
+            controller.close()
