@@ -16,10 +16,18 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 87.0,
-		"last_filter": "sublimeproje",
+		"height": 213.0,
+		"last_filter": "build wi",
 		"selected_items":
 		[
+			[
+				"build wi",
+				"Build With: Python"
+			],
+			[
+				"build wit",
+				"Build With: Anaconda Python Builder"
+			],
 			[
 				"sublimeproje",
 				"Project Manager: Import *.sublime-project File"
@@ -89,10 +97,10 @@
 	},
 	"file_history":
 	[
+		"/home/tuyama/TG/TG.sublime-project",
 		"/home/tuyama/TG/app/startup.py",
 		"/home/tuyama/TG/serialcom/data_serial.py",
 		"/home/tuyama/TG/controllers/controller.py",
-		"/home/tuyama/TG/TG.sublime-project",
 		"/home/tuyama/TG/app/pygame_viewer.py",
 		"/home/tuyama/TG/.sublime-project",
 		"/home/tuyama/TG/.env",
