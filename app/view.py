@@ -7,6 +7,7 @@ from pgu import gui
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.backends.backend_agg as agg
+import matplotlib.pyplot as plt 
 
 app = gui.App()
 e = gui.Button("Hello World")
@@ -58,16 +59,14 @@ class View(object):
             "sser_data": []
         }
         self.gui()
+        self.fig = plt.figure(1,figsize=(10,3), dpi=100)
 
     def graph(self, recorder):
         """Print some graph."""
-        fig = pylab.figure(figsize=[4, 4], # Inches
-                           dpi=100,        # 100 dots per inch, so the resulting buffer is 400x400 pixels
-                           )
-        ax = fig.gca()
+        ax = self.fig.gca()
         ax.plot(recorder.raw[-1000:])
 
-        canvas = agg.FigureCanvasAgg(fig)
+        canvas = agg.FigureCanvasAgg(self.fig)
         canvas.draw()
         renderer = canvas.get_renderer()
         raw_data = renderer.tostring_rgb()
@@ -76,7 +75,7 @@ class View(object):
         size = canvas.get_width_height()
 
         surf = pygame.image.fromstring(raw_data, size, "RGB")
-        screen.blit(surf, (400,300))
+        screen.blit(surf, (50,350))
 
     def gui(self):
         """Print some GUI."""
@@ -132,27 +131,6 @@ class View(object):
             pygame.draw.rect(
                 self.window, color, (25 + i * 10, 400 - value, 5, value))
 
-    def print_board(self):
-        """Print EEG board."""
-        bd = self.bd
-        pygame.draw.line(self.window, blueColor, (bd[0][0], bd[1][2]), (bd[0][1], bd[1][2]))
-        pygame.draw.line(self.window, blueColor, (bd[0][0], bd[1][0]), (bd[0][1], bd[1][0]))
-        pygame.draw.line(self.window, blueColor, (bd[0][0], bd[1][1]), (bd[0][1], bd[1][1]))
-        pygame.draw.line(self.window, blueColor, (bd[0][0], bd[1][0]), (bd[0][0], bd[1][1]))
-        pygame.draw.line(self.window, blueColor, (bd[0][1], bd[1][0]), (bd[0][1], bd[1][1]))
-
-
-    def print_eeg(self, recorder):
-        """Print EEG record."""
-        lv = 0
-        bd = self.bd
-        for i, value in enumerate(recorder.raw[-1000:]):
-            v = value / 5.0
-            pygame.draw.line(
-                self.window, redColor, (i + bd[0][0], bd[1][2] - lv), (i + bd[0][0], bd[1][2] - v))
-            lv = v
-
-
     def print_circle(self, position, value):
         """Print circle on screen."""
         try:
@@ -164,7 +142,7 @@ class View(object):
 
     def print_waves(self, recorder):
         """Print word on screen."""
-        pos_y = 350
+        pos_y = 650
         self.print_message(None, None)
         self.window.blit(font_20.render("Delta", False, deltaColor), (25,  pos_y))
         self.window.blit(font_20.render("Theta", False, thetaColor), (50,  pos_y + 25))

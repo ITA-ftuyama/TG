@@ -34,7 +34,6 @@ def main():
     fps_clock = pygame.time.Clock()
 
     mock = True
-    raw_eeg = True
     spectra = []
 
     quit = False
@@ -74,9 +73,6 @@ def main():
                         value = p.current_vector[i] *100.0/m
                     pygame.draw.rect(window, redColor,
                     (600+i*30,450-value, 6,value))"""
-            if raw_eeg:
-                view.print_board()
-                view.print_eeg(recorder)
         elif socket is None:
             view.print_message("Mindwave not detected...", "status")
             pass
