@@ -3,6 +3,7 @@
 """ViewController."""
 import pygame
 import struct
+from pgu import gui
 
 # import matplotlib
 # matplotlib.use("Agg")
@@ -11,6 +12,14 @@ import struct
 
 
 # import pylab
+
+app = gui.App()
+e = gui.Button("Hello World")
+
+c = gui.Container(align=-1,valign=-1)
+c.add(e,0,0)
+
+app.init(c)
 
 pygame.init()
 
@@ -79,6 +88,7 @@ class View(object):
         """Print some GUI."""
         self.window.fill(backColor)
         self.window.blit(font_32.render("Mindwave Controller", False, titleColor), (50, 50))
+        app.paint()
         #self.graph()
 
     def substr(self, messages):
