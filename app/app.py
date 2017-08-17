@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Pygame viewer."""
 import pygame
+import time
 from mindwave.pyeeg import bin_power
 from mindwave.parser import ThinkGearParser, TimeSeriesRecorder
 from mindwave.bluetooth_headset import BluetoothError
@@ -9,7 +10,6 @@ from startup import mindwave_startup
 from controllers.controller import Controller
 from random import randint
 from numpy import *
-from pygame import *
 from view import View
 
 
@@ -22,7 +22,6 @@ def mock_data(parser):
     parser.feed(chr(0xaa) + chr(0xaa) + chr(3) + chr(0x05) + chr(randint(0,100)) + chr(0x00))
     parser.feed(chr(0xaa) + chr(0xaa) + chr(3) + chr(0x16) + chr(randint(0,100)) + chr(0x00))
 
-
 def main():
     """Main loop capture."""
     recorder = TimeSeriesRecorder()
@@ -31,13 +30,12 @@ def main():
     view = View()
     controller = Controller(view, 'led')
     socket, args = mindwave_startup(view=view, description="Pygame Example")
-    fps_clock = pygame.time.Clock()
+    #fps_clock = pygame.time.Clock()
 
     mock = True
     spectra = []
 
-    quit = False
-    while quit is False:   
+    while view.quit is False:   
         try:
             if socket is not None:
                 data = socket.recv(10000)
@@ -79,12 +77,13 @@ def main():
         else:
             view.print_message("Not receiving any data from mindwave...", "status")
             pass
+        time.sleep(0.01)
 
-        for event in pygame.event.get():
-            quit = event.type == QUIT or (
-                event.type == KEYDOWN and event.key == K_ESCAPE
-            )
-        pygame.display.update()
+        # for event in pygame.event.get():
+        #     quit = event.type == QUIT or (
+        #         event.type == KEYDOWN and event.key == K_ESCAPE
+        #     )
+        #pygame.display.update()
         #fps_clock.tick(12)
 
 controller = None
@@ -92,6 +91,6 @@ if __name__ == '__main__':
     try:
         main()
     finally:
-        pygame.quit()
+        #pygame.quit()
         if controller:
             controller.close()
