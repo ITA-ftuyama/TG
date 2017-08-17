@@ -4,10 +4,8 @@
 import pygame
 import struct
 from pgu import gui
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.backends.backend_agg as agg
-import matplotlib.pyplot as plt 
+from pyqtgraph.Qt import QtCore, QtGui
+import pyqtgraph as pg
 
 app = gui.App()
 e = gui.Button("Hello World")
@@ -59,22 +57,25 @@ class View(object):
             "sser_data": []
         }
         self.gui()
-        self.fig = plt.figure(1,figsize=(10,3), dpi=100)
 
     def graph(self, recorder):
         """Print some graph."""
-        ax = self.fig.gca()
-        ax.plot(recorder.raw[-1000:])
+        # self.fig = plt.figure(1,figsize=(10,3), dpi=100)
+        # ax = self.fig.gca()
+        # ax.plot(recorder.raw[-1000:])
 
-        canvas = agg.FigureCanvasAgg(self.fig)
-        canvas.draw()
-        renderer = canvas.get_renderer()
-        raw_data = renderer.tostring_rgb()
+        # canvas = agg.FigureCanvasAgg(self.fig)
+        # canvas.draw()
+        # renderer = canvas.get_renderer()
+        # raw_data = renderer.tostring_rgb()
 
-        screen = pygame.display.get_surface()
-        size = canvas.get_width_height()
+        # screen = pygame.display.get_surface()
+        # size = canvas.get_width_height()
 
-        surf = pygame.image.fromstring(raw_data, size, "RGB")
+        # surf = pygame.image.fromstring(raw_data, size, "RGB")
+        # screen.blit(surf, (50,350))
+        self.img = pg.ImageItem(border='w')
+        surf = pygame.image.fromstring('2', [100,200], "RGB")
         screen.blit(surf, (50,350))
 
     def gui(self):

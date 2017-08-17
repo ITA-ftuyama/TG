@@ -3,13 +3,15 @@ ccsm==0.9.12.2
 compizconfig-python==0.9.12.2
 cycler==0.10.0
 functools32==3.2.3.post2
-matplotlib==2.0.2
+matplotlib==1.5.1
 numpy==1.13.1
 pandas==0.20.3
+Pillow==3.1.2
 PyBluez==0.22
 pygame==1.9.3
 pygobject==3.20.0
 pyparsing==2.2.0
+pyqtgraph==0.10.0
 pyserial==3.4
 python-dateutil==2.6.1
 pytz==2017.2
