@@ -25,6 +25,7 @@ def mindwave_startup(view=None, description="", extra_args=[]):
         retries = 0
         view.flash_message("Trying bluetooth connection...", "bluetooth")
         while socket is None and retries < 1:
+            nearby = []
             try:
                 socket, socket_addr, nearby = connect_magic()
             except:

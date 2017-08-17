@@ -4,14 +4,9 @@
 import pygame
 import struct
 from pgu import gui
-
-# import matplotlib
-# matplotlib.use("Agg")
-
-# import matplotlib.backends.backend_agg as agg
-
-
-# import pylab
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.backends.backend_agg as agg
 
 app = gui.App()
 e = gui.Button("Hello World")
@@ -63,15 +58,14 @@ class View(object):
             "sser_data": []
         }
         self.gui()
-        pygame.display.update()
 
-    def graph(self):
+    def graph(self, recorder):
         """Print some graph."""
         fig = pylab.figure(figsize=[4, 4], # Inches
                            dpi=100,        # 100 dots per inch, so the resulting buffer is 400x400 pixels
                            )
         ax = fig.gca()
-        ax.plot([1, 2, 4])
+        ax.plot(recorder.raw[-1000:])
 
         canvas = agg.FigureCanvasAgg(fig)
         canvas.draw()
@@ -82,14 +76,13 @@ class View(object):
         size = canvas.get_width_height()
 
         surf = pygame.image.fromstring(raw_data, size, "RGB")
-        screen.blit(surf, (0,0))
+        screen.blit(surf, (400,300))
 
     def gui(self):
         """Print some GUI."""
         self.window.fill(backColor)
         self.window.blit(font_32.render("Mindwave Controller", False, titleColor), (50, 50))
         app.paint()
-        #self.graph()
 
     def substr(self, messages):
         """Print cropped message."""
@@ -181,6 +174,8 @@ class View(object):
 
         pos_x = 650
         pos_y = 200
+
+        self.graph(recorder)
 
         """Print blink level."""
         position = (pos_x, pos_y)

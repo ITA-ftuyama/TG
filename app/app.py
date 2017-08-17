@@ -89,7 +89,7 @@ def main():
                 event.type == KEYDOWN and event.key == K_ESCAPE
             )
         pygame.display.update()
-        fps_clock.tick(12)
+        #fps_clock.tick(12)
 
 controller = None
 if __name__ == '__main__':
