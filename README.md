@@ -1,11 +1,10 @@
-TG - Transcend God
-===================
+TEEG - Translate Electroencefalography
+======================================
 
-A project using:
+TEEG is a Graduation Project (TG) that applies deeplearning concepts to translate raw EEG signals (using Neurosky Mindwave headsets) into commands to move a robotic arm.
 
 
-# Python Mindwave - [Repo](https://github.com/akloster/python-mindwave)  
------------
+## Python Mindwave - [Repo](https://github.com/akloster/python-mindwave)  
 
 This is a library to interface with the Neurosky Mindwave headsets. It can
 parse the binary protocol spoken by Neurosky's ThinkGear AM modules. These
@@ -18,6 +17,6 @@ represent Neurosky.
 This software is not intended to be used in medical diagnostics or medical
 treatment.
 
+### Author 
 
-Currently this software can only connect to the bluetooth version
-(Mindwave Mobile), because I don't posess the other variations.
+Felipe Tuyama - [ftuyama](https://github.com/ftuyama)
