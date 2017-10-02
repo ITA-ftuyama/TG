@@ -15,7 +15,6 @@ class View(object):
     def __init__(self):
         """Initializes the View."""
         global xs, ys, messages
-        self.quit = False
         messages = {
             "bluetooth": [],
             "serial": [],
@@ -24,68 +23,8 @@ class View(object):
         }
         xs=numpy.arange(self.numPoints)
         ys=numpy.sin(3.14159*xs*10/self.numPoints) #this is our data
-        self.run()
-
-    def run(self):
-        """Runs GUI on separate thread."""
-        self.thread = threading.Thread(target=self.start)
-        self.thread.start()
-
-    def die(self, event):
-        """Kills thread."""
-        self.app.exit()
-        self.quit = True
-
-    def start(self):
-        """Starts the GUI."""
-        self.app = QtGui.QApplication(sys.argv)
-        self.win_plot = gui.QtGui.QMainWindow()
-        self.win_plot.closeEvent = self.die
-
-        self.uiplot = gui.Ui_win_plot()
-        self.uiplot.setupUi(self.win_plot)
-
-        # tell buttons what to do when clicked
-        self.uiplot.btnA.clicked.connect(self.plot)
-        self.uiplot.btnB.clicked.connect(lambda: self.uiplot.timer.setInterval(100.0))
-        self.uiplot.btnC.clicked.connect(lambda: self.uiplot.timer.setInterval(10.0))
-        self.uiplot.btnD.clicked.connect(lambda: self.uiplot.timer.setInterval(1.0))
-
-        # set up the QwtPlot (pay attention!)
-        self.c=Qwt.QwtPlotCurve()  #make a curve
-        self.c.attach(self.uiplot.qwtPlot) #attach it to the qwtPlot object
-        self.uiplot.timer = QtCore.QTimer() #start a timer (to call replot events)
-        self.uiplot.timer.start(10.0) #set the interval (in ms)
-        self.win_plot.connect(self.uiplot.timer, QtCore.SIGNAL('timeout()'), self.plot)
-
-        # plot messages
-        self.uiplot.msg_timer = QtCore.QTimer() #start a timer (to call replot events)
-        self.uiplot.msg_timer.start(500.0) #set the interval (in ms)
-        self.win_plot.connect(self.uiplot.msg_timer, QtCore.SIGNAL('timeout()'), self.plot_messages)
-        self.uiplot.bluetooth.setStyleSheet('color: blue')
-        self.uiplot.serial.setStyleSheet('color: red')
-        self.uiplot.status.setStyleSheet('color: green')
-
-        self.win_plot.show()
-        sys.exit(self.app.exec_())
-
-    def plot(self):
-        global ys
-        #ys=numpy.roll(ys,-1)
-        self.c.setData(xs, ys)
-        self.uiplot.qwtPlot.replot()
-
-    def plot_messages(self):
-        global messages
-        self.uiplot.bluetooth.setText("[Bluetooth]: %s" % self.substr(messages["bluetooth"]))
-        self.uiplot.serial.setText("[Serial]: %s" % self.substr(messages["serial"]))
-        self.uiplot.status.setText("[Errors]: %s" % self.substr(messages["status"]))
-        self.uiplot.data.setText("[Data]: %s" % self.substr(messages["sser_data"]))
-
-    def graph(self, recorder):
-        """Print some graph."""
-        # self.fig = plt.figure(1,figsize=(10,3), dpi=100)
-        pass
+        self.screen = Screen()
+        self.screen.run()
 
     def gui(self):
         """Print some GUI."""
@@ -93,11 +32,6 @@ class View(object):
         # self.window.blit(font_32.render("Mindwave Controller", False, titleColor), (50, 50))
         # app.paint()
         pass
-
-    def substr(self, messages):
-        """Print cropped message."""
-        msg = "; ".join(messages)
-        return msg[-100:]
 
     def print_message(self, message, kind):
         """Print some messages."""
@@ -182,3 +116,70 @@ class View(object):
         # position = (pos_x + 300, pos_y)
         # self.print_circle(position, int(recorder.attention[-1] / 2))
         # self.window.blit(attention_img, (pos_x + 260, pos_y + 60))
+
+
+class Screen(object):
+    def __init__(self):
+        """Initializes the Gui."""
+        self.quit = False
+
+    def run(self):
+        """Runs GUI on separate thread."""
+        self.thread = threading.Thread(target=self.start)
+        self.thread.start()
+
+    def die(self, event):
+        """Kills thread."""
+        self.app.exit()
+        self.quit = True
+
+    def start(self):
+        """Starts the GUI."""
+        self.app = QtGui.QApplication(sys.argv)
+        self.win_plot = gui.QtGui.QMainWindow()
+        self.win_plot.closeEvent = self.die
+
+        self.uiplot = gui.Ui_win_plot()
+        self.uiplot.setupUi(self.win_plot)
+
+        # tell buttons what to do when clicked
+        self.uiplot.btnA.clicked.connect(self.plot)
+        self.uiplot.btnB.clicked.connect(lambda: self.uiplot.timer.setInterval(100.0))
+        self.uiplot.btnC.clicked.connect(lambda: self.uiplot.timer.setInterval(10.0))
+        self.uiplot.btnD.clicked.connect(lambda: self.uiplot.timer.setInterval(1.0))
+
+        # set up the QwtPlot (pay attention!)
+        self.c=Qwt.QwtPlotCurve()  #make a curve
+        self.c.attach(self.uiplot.qwtPlot) #attach it to the qwtPlot object
+        self.uiplot.timer = QtCore.QTimer() #start a timer (to call replot events)
+        self.uiplot.timer.start(10.0) #set the interval (in ms)
+        self.win_plot.connect(self.uiplot.timer, QtCore.SIGNAL('timeout()'), self.plot)
+
+        # plot messages
+        self.uiplot.msg_timer = QtCore.QTimer() #start a timer (to call replot events)
+        self.uiplot.msg_timer.start(500.0) #set the interval (in ms)
+        self.win_plot.connect(self.uiplot.msg_timer, QtCore.SIGNAL('timeout()'), self.plot_messages)
+        self.uiplot.bluetooth.setStyleSheet('color: blue')
+        self.uiplot.serial.setStyleSheet('color: red')
+        self.uiplot.status.setStyleSheet('color: green')
+
+        self.win_plot.show()
+        sys.exit(self.app.exec_())
+
+    def plot(self):
+        global ys
+        #ys=numpy.roll(ys,-1)
+        self.c.setData(xs, ys)
+        self.uiplot.qwtPlot.replot()
+
+    def plot_messages(self):
+        global messages
+        self.uiplot.bluetooth.setText("[Bluetooth]: %s" % self.substr(messages["bluetooth"]))
+        self.uiplot.serial.setText("[Serial]: %s" % self.substr(messages["serial"]))
+        self.uiplot.status.setText("[Errors]: %s" % self.substr(messages["status"]))
+        self.uiplot.data.setText("[Data]: %s" % self.substr(messages["sser_data"]))
+
+    def substr(self, messages):
+        """Print cropped message."""
+        msg = "; ".join(messages)
+        return msg[-100:]

@@ -35,7 +35,7 @@ def main():
     mock = True
     spectra = []
 
-    while view.quit is False:   
+    while view.screen.quit is False:   
         try:
             if socket is not None:
                 data = socket.recv(10000)

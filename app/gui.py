@@ -40,7 +40,7 @@ class Ui_win_plot(object):
         self.label_2.setFont(font)
         self.label_2.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.horizontalLayout_3.addWidget(self.label_2, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+        self.horizontalLayout_3.addWidget(self.label_2, QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
         self.qwtPlot = QwtPlot(self.centralwidget)
         self.qwtPlot.setObjectName(_fromUtf8("qwtPlot"))
