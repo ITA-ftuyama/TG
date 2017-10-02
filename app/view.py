@@ -7,16 +7,16 @@ import numpy
 import threading
 from PyQt4 import QtCore, QtGui
 import PyQt4.Qwt5 as Qwt
-
+messages = {}
 
 class View(object):
     numPoints=1000
 
     def __init__(self):
         """Initializes the View."""
-        global xs, ys
+        global xs, ys, messages
         self.quit = False
-        self.messages = {
+        messages = {
             "bluetooth": [],
             "serial": [],
             "status": [],
@@ -58,6 +58,14 @@ class View(object):
         self.uiplot.timer.start(10.0) #set the interval (in ms)
         self.win_plot.connect(self.uiplot.timer, QtCore.SIGNAL('timeout()'), self.plot)
 
+        # plot messages
+        self.uiplot.msg_timer = QtCore.QTimer() #start a timer (to call replot events)
+        self.uiplot.msg_timer.start(500.0) #set the interval (in ms)
+        self.win_plot.connect(self.uiplot.msg_timer, QtCore.SIGNAL('timeout()'), self.plot_messages)
+        self.uiplot.bluetooth.setStyleSheet('color: blue')
+        self.uiplot.serial.setStyleSheet('color: red')
+        self.uiplot.status.setStyleSheet('color: green')
+
         self.win_plot.show()
         sys.exit(self.app.exec_())
 
@@ -66,6 +74,13 @@ class View(object):
         #ys=numpy.roll(ys,-1)
         self.c.setData(xs, ys)
         self.uiplot.qwtPlot.replot()
+
+    def plot_messages(self):
+        global messages
+        self.uiplot.bluetooth.setText("[Bluetooth]: %s" % self.substr(messages["bluetooth"]))
+        self.uiplot.serial.setText("[Serial]: %s" % self.substr(messages["serial"]))
+        self.uiplot.status.setText("[Errors]: %s" % self.substr(messages["status"]))
+        self.uiplot.data.setText("[Data]: %s" % self.substr(messages["sser_data"]))
 
     def graph(self, recorder):
         """Print some graph."""
@@ -81,33 +96,23 @@ class View(object):
 
     def substr(self, messages):
         """Print cropped message."""
-        msg = ", ".join(messages)
+        msg = "; ".join(messages)
         return msg[-100:]
 
     def print_message(self, message, kind):
         """Print some messages."""
-        # if message is not None:
-        #     self.messages[kind].append(message)
-
-        # self.window.blit(font_20.render(self.substr(self.messages["bluetooth"]),  False, blueColor),  (50, 100))
-        # self.window.blit(font_20.render(self.substr(self.messages["serial"]),     False, redColor),   (50, 125))
-        # self.window.blit(font_20.render(self.substr(self.messages["status"]),     False, whiteColor), (50, 150))
-        # self.window.blit(font_14.render("Sent Serial: " + "; ".join(self.messages["sser_data"]),   False, redColor),   (50, 175))
-
-        pass
+        if message is not None:
+            messages[kind].append(message)
 
     def add_message(self, message, kind):
         """Add some messages."""
-        self.messages[kind].append(message)
-        if len(self.messages[kind]) > 10:
-            self.messages[kind].pop(0)
+        messages[kind].append(message)
+        if len(messages[kind]) > 50:
+            messages[kind].pop(0)
 
     def flash_message(self, message, kind):
         # self.gui()
-        # self.print_message(message, kind)
-        # pygame.display.update()
-
-        pass
+        self.print_message(message, kind)
 
 
     def wave_color(self, freq):

@@ -33,7 +33,7 @@ def mindwave_startup(view=None, description="", extra_args=[]):
             finally:
                 if socket is None:
                     retries += 1
-                    view.flash_message(json.dumps(nearby), "bluetooth")
+                    view.flash_message("Nearby devices: " + json.dumps(nearby), "bluetooth")
                     view.flash_message("Retrying... {retries}".format(retries=retries), "bluetooth")
                     time.sleep(1)
                 else: 
