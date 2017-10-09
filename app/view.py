@@ -6,7 +6,10 @@ import sys
 import numpy
 import threading
 from PyQt4 import QtCore, QtGui
+from qwt_plot import BarCurve
+import PyQt4.Qt as Qt
 import PyQt4.Qwt5 as Qwt
+
 messages = {}
 
 class View(object):
@@ -14,7 +17,7 @@ class View(object):
 
     def __init__(self):
         """Initializes the View."""
-        global xs, ys, messages
+        global xs, ys, messages, spectrum, flen
         messages = {
             "bluetooth": [],
             "serial": [],
@@ -23,6 +26,8 @@ class View(object):
         }
         xs=numpy.arange(self.numPoints)
         ys=numpy.sin(3.14159*xs*10/self.numPoints) #this is our data
+        flen=50
+        spectrum=numpy.arange(flen)
         self.screen = Screen()
         self.screen.run()
 
@@ -48,23 +53,10 @@ class View(object):
         # self.gui()
         self.print_message(message, kind)
 
-
-    def wave_color(self, freq):
-        """Color according to the wave."""
-        # if freq < 3:
-        #     return deltaColor
-        # elif freq < 8:
-        #     return thetaColor
-        # elif freq < 13:
-        #     return alphaColor
-        # elif freq < 30:
-        #     return betaColor
-        # else:
-        #     return gammaColor
-        return None
-
-    def print_spectrum(self, spectrum, flen):
+    def print_spectrum(self, spectra):
         """Print mind wave spectrum."""
+        global spectrum
+        spectrum = spectra
         # for i in range(flen - 1):
         #     value = float(spectrum[i] * 1000)
         #     color = self.wave_color(i)
@@ -150,7 +142,18 @@ class Screen(object):
 
         # set up the QwtPlot (pay attention!)
         self.c=Qwt.QwtPlotCurve()  #make a curve
+        self.c.setPen(QtGui.QPen(Qt.Qt.darkRed, 1.2))
         self.c.attach(self.uiplot.qwtPlot) #attach it to the qwtPlot object
+
+        # set up the QwtPlot (pay attention!)
+        self.bar=[]
+        for i in range(flen - 1):
+            value = float(spectrum[i] * 1000)
+            self.bar.append(BarCurve(Qt.Qt.black, self.wave_color(i)))
+            self.bar[i].attach(self.uiplot.qwtBarPlot)
+            self.bar[i].setData([25 + i * 10, 400 - value], [5, value])
+
+        # set up timer to replot
         self.uiplot.timer = QtCore.QTimer() #start a timer (to call replot events)
         self.uiplot.timer.start(10.0) #set the interval (in ms)
         self.win_plot.connect(self.uiplot.timer, QtCore.SIGNAL('timeout()'), self.plot)
@@ -167,10 +170,15 @@ class Screen(object):
         sys.exit(self.app.exec_())
 
     def plot(self):
-        global ys
+        global ys, spectrum, flen
         #ys=numpy.roll(ys,-1)
         self.c.setData(xs, ys)
+        for i in range(flen - 1):
+            value = numpy.log10(float(spectrum[i] * 1000) + 1)
+            self.bar[i].setData([i, i + 1], [0, value])
+
         self.uiplot.qwtPlot.replot()
+        self.uiplot.qwtBarPlot.replot()
 
     def plot_messages(self):
         global messages
@@ -183,3 +191,17 @@ class Screen(object):
         """Print cropped message."""
         msg = "; ".join(messages)
         return msg[-100:]
+
+    def wave_color(self, freq):
+        """Color according to the wave."""
+        if freq < 3:
+            return Qt.Qt.white #deltaColor
+        elif freq < 8:
+            return Qt.Qt.magenta #thetaColor
+        elif freq < 13:
+            return Qt.Qt.red #alphaColor
+        elif freq < 30:
+            return Qt.Qt.cyan #betaColor
+        else:
+            return Qt.Qt.green #gammaColor
+        return None

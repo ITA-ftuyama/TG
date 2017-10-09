@@ -55,7 +55,7 @@ def main():
                     spectra.pop(0)
 
                 spectrum = mean(array(spectra), axis=0)
-                view.print_spectrum(spectrum, flen)
+                view.print_spectrum(spectrum)
             else:
                 pass
 
