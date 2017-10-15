@@ -4,6 +4,7 @@
 import gui
 import sys
 import numpy
+import datetime
 import threading
 from PyQt4 import QtCore, QtGui
 from qwt_plot import BarCurve
@@ -149,8 +150,13 @@ class Screen(object):
         else:
             print "Stop recording"
             self.uiplot.pushButton.setText("Not Recording")
+            self.save_record()
         record = not record
 
+    def save_record(self):
+        global ys
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        numpy.savetxt('records/' + now + '.txt', ys, delimiter="\n", fmt="%s") 
 
     def substr(self, messages):
         """Print cropped message."""
