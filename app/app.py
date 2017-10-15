@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Pygame viewer."""
-import pygame
 import time
 from mindwave.pyeeg import bin_power
 from mindwave.parser import ThinkGearParser, TimeSeriesRecorder
@@ -29,8 +28,7 @@ def main():
 
     view = View()
     controller = Controller(view, 'led')
-    socket, args = mindwave_startup(view=view, description="Pygame Example")
-    #fps_clock = pygame.time.Clock()
+    socket, args = mindwave_startup(view=view, description="TEEG")
 
     mock = True
     spectra = []
@@ -41,10 +39,10 @@ def main():
                 data = socket.recv(10000)
                 parser.feed(data)
         except BluetoothError:
-            view.flash_message("Bluetooth Error", "status")
+            view.print_message("Bluetooth Error", "status")
             pass
-        if mock: mock_data(parser)
-        view.gui()
+        if mock: 
+            mock_data(parser)
         if has_recorded(recorder):
             flen = 50
             if len(recorder.raw) >= 500:
@@ -55,7 +53,7 @@ def main():
                     spectra.pop(0)
 
                 spectrum = mean(array(spectra), axis=0)
-                view.print_spectrum(spectrum)
+                view.update_spectrum(spectrum)
             else:
                 pass
 
@@ -79,18 +77,10 @@ def main():
             pass
         time.sleep(0.01)
 
-        # for event in pygame.event.get():
-        #     quit = event.type == QUIT or (
-        #         event.type == KEYDOWN and event.key == K_ESCAPE
-        #     )
-        #pygame.display.update()
-        #fps_clock.tick(12)
-
 controller = None
 if __name__ == '__main__':
     try:
         main()
     finally:
-        #pygame.quit()
         if controller:
             controller.close()

@@ -1,5 +1,5 @@
 # Gambeta feliz
-from PyQt4.Qwt5 import QwtPlot
+from PyQt4.Qwt5 import QwtPlot, QwtDial
 import PyQt4.Qt as Qt
 import PyQt4.Qwt5 as Qwt
 

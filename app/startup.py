@@ -23,7 +23,7 @@ def mindwave_startup(view=None, description="", extra_args=[]):
     if args.address is None:
         socket = None
         retries = 0
-        view.flash_message("Trying bluetooth connection...", "bluetooth")
+        view.print_message("Trying bluetooth connection...", "bluetooth")
         while socket is None and retries < 1:
             nearby = []
             try:
@@ -33,31 +33,31 @@ def mindwave_startup(view=None, description="", extra_args=[]):
             finally:
                 if socket is None:
                     retries += 1
-                    view.flash_message("Nearby devices: " + json.dumps(nearby), "bluetooth")
-                    view.flash_message("Retrying... {retries}".format(retries=retries), "bluetooth")
+                    view.print_message("Nearby devices: " + json.dumps(nearby), "bluetooth")
+                    view.print_message("Retrying... {retries}".format(retries=retries), "bluetooth")
                     time.sleep(1)
                 else: 
-                    view.flash_message("MindWave Mobile found", "bluetooth")
+                    view.print_message("MindWave Mobile found", "bluetooth")
         if socket is None:
-            view.flash_message("No MindWave Mobile found.", "bluetooth")
+            view.print_message("No MindWave Mobile found.", "bluetooth")
             return None, None
     else:
         socket = connect_bluetooth_addr(args.address)
         if socket is None:
-            view.flash_message("Connection failed.", "bluetooth")
+            view.print_message("Connection failed.", "bluetooth")
             sys.exit(-1)
         socket_addr = args.address
-    view.flash_message("Connected with MindWave Mobile at %s" % socket_addr, "bluetooth")
+    view.print_message("Connected with MindWave Mobile at %s" % socket_addr, "bluetooth")
     for i in range(5):
         try:
             if i > 0:
-                view.flash_message("Retrying...", "bluetooth")
+                view.print_message("Retrying...", "bluetooth")
             time.sleep(2)
             len(socket.recv(10))
             break
         except BluetoothError, e:
             print e
         if i == 5:
-            view.flash_message("Connection failed.", "bluetooth")
+            view.print_message("Connection failed.", "bluetooth")
             sys.exit(-1)
     return socket, args

@@ -10,14 +10,17 @@ from qwt_plot import BarCurve
 import PyQt4.Qt as Qt
 import PyQt4.Qwt5 as Qwt
 
+record = False
+lvl = [0, 0, 0]
 messages = {}
+flen = 50
 
 class View(object):
     numPoints=1000
 
     def __init__(self):
         """Initializes the View."""
-        global xs, ys, messages, spectrum, flen
+        global xs, ys, lvl, messages, spectrum, flen
         messages = {
             "bluetooth": [],
             "serial": [],
@@ -26,17 +29,9 @@ class View(object):
         }
         xs=numpy.arange(self.numPoints)
         ys=numpy.sin(3.14159*xs*10/self.numPoints) #this is our data
-        flen=50
         spectrum=numpy.arange(flen)
         self.screen = Screen()
         self.screen.run()
-
-    def gui(self):
-        """Print some GUI."""
-        # self.window.fill(backColor)
-        # self.window.blit(font_32.render("Mindwave Controller", False, titleColor), (50, 50))
-        # app.paint()
-        pass
 
     def print_message(self, message, kind):
         """Print some messages."""
@@ -49,65 +44,17 @@ class View(object):
         if len(messages[kind]) > 50:
             messages[kind].pop(0)
 
-    def flash_message(self, message, kind):
-        # self.gui()
-        self.print_message(message, kind)
-
-    def print_spectrum(self, spectra):
+    def update_spectrum(self, spectra):
         """Print mind wave spectrum."""
         global spectrum
         spectrum = spectra
-        # for i in range(flen - 1):
-        #     value = float(spectrum[i] * 1000)
-        #     color = self.wave_color(i)
-        #     pygame.draw.rect(
-        #         self.window, color, (25 + i * 10, 400 - value, 5, value))
-
-        pass
-
-    def print_circle(self, position, value):
-        """Print circle on screen."""
-        # try:
-        #     pygame.draw.circle(self.window, redColor, position, value)
-        #     pygame.draw.circle(self.window, greenColor, position, 30, 1)
-        #     pygame.draw.circle(self.window, greenColor, position, 50, 1)
-        # except:
-        #     return
-
-        pass
 
     def print_waves(self, recorder):
         """Print word on screen."""
-        global ys
+        global ys, lvl
         #ys=numpy.roll(ys,-1)
         ys = recorder.raw.values[-1*self.numPoints:]
-        # pos_y = 650
-        # self.print_message(None, None)
-        # self.window.blit(font_20.render("Delta", False, deltaColor), (25,  pos_y))
-        # self.window.blit(font_20.render("Theta", False, thetaColor), (50,  pos_y + 25))
-        # self.window.blit(font_20.render("Alpha", False, alphaColor), (100, pos_y))
-        # self.window.blit(font_20.render("Beta",  False, betaColor),  (150, pos_y + 25))
-        # self.window.blit(font_20.render("Gamma", False, gammaColor), (350, pos_y))
-
-        # pos_x = 650
-        # pos_y = 200
-
-        # self.graph(recorder)
-
-        # """Print blink level."""
-        # position = (pos_x, pos_y)
-        # self.print_circle(position, int(recorder.blink[-1] / 2))
-        # self.window.blit(blink_img, (pos_x - 20, pos_y + 60))
-
-        # """Print meditation level."""
-        # position = (pos_x + 150, pos_y)
-        # self.print_circle(position, int(recorder.meditation[-1] / 2))
-        # self.window.blit(meditation_img, (pos_x + 100, pos_y + 60))
-
-        # """Print attention level."""
-        # position = (pos_x + 300, pos_y)
-        # self.print_circle(position, int(recorder.attention[-1] / 2))
-        # self.window.blit(attention_img, (pos_x + 260, pos_y + 60))
+        lvl = [int(recorder.blink[-1] / 2), int(recorder.attention[-1] / 2), int(recorder.meditation[-1] / 2)]
 
 
 class Screen(object):
@@ -166,6 +113,9 @@ class Screen(object):
         self.uiplot.serial.setStyleSheet('color: red')
         self.uiplot.status.setStyleSheet('color: green')
 
+        # set up button
+        self.uiplot.pushButton.clicked.connect(self.record)
+
         self.win_plot.show()
         sys.exit(self.app.exec_())
 
@@ -180,12 +130,27 @@ class Screen(object):
         self.uiplot.qwtPlot.replot()
         self.uiplot.qwtBarPlot.replot()
 
+        self.uiplot.progressBar.setValue(lvl[0])
+        self.uiplot.progressBar_2.setValue(lvl[1])
+        self.uiplot.progressBar_3.setValue(lvl[2])
+
     def plot_messages(self):
         global messages
         self.uiplot.bluetooth.setText("[Bluetooth]: %s" % self.substr(messages["bluetooth"]))
         self.uiplot.serial.setText("[Serial]: %s" % self.substr(messages["serial"]))
         self.uiplot.status.setText("[Errors]: %s" % self.substr(messages["status"]))
         self.uiplot.data.setText("[Data]: %s" % self.substr(messages["sser_data"]))
+
+    def record(self):
+        global record
+        if not record:
+            print "Start recording"
+            self.uiplot.pushButton.setText("Recording")
+        else:
+            print "Stop recording"
+            self.uiplot.pushButton.setText("Not Recording")
+        record = not record
+
 
     def substr(self, messages):
         """Print cropped message."""
