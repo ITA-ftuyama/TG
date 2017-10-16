@@ -11,10 +11,19 @@ from qwt_plot import BarCurve
 import PyQt4.Qt as Qt
 import PyQt4.Qwt5 as Qwt
 
-record = False
+# Gui info
 lvl = [0, 0, 0]
 messages = {}
 flen = 50
+
+# Recording opts
+record = False
+rec_start = 0
+rec_stop = 0
+rec_period = 100
+recorder_size = 0
+recorded = []
+
 
 class View(object):
     numPoints=1000
@@ -52,8 +61,10 @@ class View(object):
 
     def print_waves(self, recorder):
         """Print word on screen."""
-        global ys, lvl
+        global ys, lvl, recorded, recorder_size
         #ys=numpy.roll(ys,-1)
+        recorded = recorder.raw.values
+        recorder_size = len(recorder.raw.values)
         ys = recorder.raw.values[-1*self.numPoints:]
         lvl = [int(recorder.blink[-1] / 2), int(recorder.attention[-1] / 2), int(recorder.meditation[-1] / 2)]
 
@@ -121,19 +132,35 @@ class Screen(object):
         sys.exit(self.app.exec_())
 
     def plot(self):
-        global ys, spectrum, flen
+        global ys, spectrum, flen, rec_start, recorder_size
         #ys=numpy.roll(ys,-1)
+
+        # Real time EEG
         self.c.setData(xs, ys)
+        self.uiplot.qwtPlot.replot()
+
+        # Frequency EEG
         for i in range(flen - 1):
             value = numpy.log10(float(spectrum[i] * 1000) + 1)
             self.bar[i].setData([i, i + 1], [0, value])
-
-        self.uiplot.qwtPlot.replot()
         self.uiplot.qwtBarPlot.replot()
 
+        # Mindwave levels
         self.uiplot.progressBar.setValue(lvl[0])
         self.uiplot.progressBar_2.setValue(lvl[1])
         self.uiplot.progressBar_3.setValue(lvl[2])
+
+        # Recording info
+        if record:
+            remaining = (recorder_size - rec_start) % rec_period
+            self.uiplot.pushButton.setText("Recording in %s" % (rec_period - remaining))
+            if remaining == 0:
+                cycle = (recorder_size - rec_start) / rec_period
+                if cycle % 2 == 0:
+                    self.c.setPen(QtGui.QPen(Qt.Qt.darkRed, 1.2))
+                else: 
+                    self.c.setPen(QtGui.QPen(Qt.Qt.blue, 1.2))
+
 
     def plot_messages(self):
         global messages
@@ -143,20 +170,31 @@ class Screen(object):
         self.uiplot.data.setText("[Data]: %s" % self.substr(messages["sser_data"]))
 
     def record(self):
-        global record
+        global record, rec_start, rec_stop, recorder_size
         if not record:
-            print "Start recording"
             self.uiplot.pushButton.setText("Recording")
+            rec_start = recorder_size
         else:
-            print "Stop recording"
             self.uiplot.pushButton.setText("Not Recording")
+            self.c.setPen(QtGui.QPen(Qt.Qt.darkRed, 1.2))
+            rec_stop = recorder_size
             self.save_record()
         record = not record
 
     def save_record(self):
-        global ys
+        global ys, recorded
+        step = 0
+        data = []
+        i = rec_start
+        while i + rec_period < rec_stop:
+            if step % 2 != 0:
+                data.append(recorded[i:(i+rec_period)])
+            i += rec_period
+            step += 1
+
+        data = numpy.array(data)
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        numpy.savetxt('records/' + now + '.txt', ys, delimiter="\n", fmt="%s") 
+        numpy.savetxt('records/' + now + '.txt', data, delimiter=" ", fmt="%s", newline="\r\n") 
 
     def substr(self, messages):
         """Print cropped message."""
