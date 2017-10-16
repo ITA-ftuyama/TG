@@ -5,3 +5,6 @@ echo "export PYTHONPATH=${PYTHONPATH}:$(pwd)" >> ~/.bashrc
 
 # Generating the gui
 # pyuic4 gui.ui -o gui.py
+
+# Adding a new package
+# pip install package && pip freeze > requirements.txt
