@@ -62,17 +62,12 @@
          </widget>
         </item>
         <item>
-         <widget class="QwtPlot" name="qwtBarPlot">
-          <zorder>Dial</zorder>
-          <zorder>Dial</zorder>
-          <zorder>verticalLayoutWidget</zorder>
-          <zorder>verticalLayoutWidget</zorder>
-         </widget>
+         <widget class="QwtPlot" name="qwtBarPlot"/>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0,0,0,0,0,0,0">
+       <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0,0,0,0,0,0,0,0">
         <property name="spacing">
          <number>0</number>
         </property>
@@ -132,6 +127,22 @@
          <widget class="QGroupBox" name="groupBox">
           <property name="title">
            <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit">
+          <property name="inputMask">
+           <string/>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="readOnly">
+           <bool>false</bool>
+          </property>
+          <property name="placeholderText">
+           <string>File name...</string>
           </property>
          </widget>
         </item>

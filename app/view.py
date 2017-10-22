@@ -4,15 +4,15 @@
 import gui
 import sys
 import numpy
-import datetime
 import threading
+from mindwave.pyeeg import bin_power
 from PyQt4 import QtCore, QtGui
 from qwt_plot import BarCurve
 import PyQt4.Qt as Qt
 import PyQt4.Qwt5 as Qwt
 
 # Gui info
-lvl = [0, 0, 0]
+lvl = [[], [], []]
 messages = {}
 flen = 50
 
@@ -20,7 +20,7 @@ flen = 50
 record = False
 rec_start = 0
 rec_stop = 0
-rec_period = 100
+rec_period = 1024
 recorder_size = 0
 recorded = []
 
@@ -66,7 +66,10 @@ class View(object):
         recorded = recorder.raw.values
         recorder_size = len(recorder.raw.values)
         ys = recorder.raw.values[-1*self.numPoints:]
-        lvl = [int(recorder.blink[-1] / 2), int(recorder.attention[-1] / 2), int(recorder.meditation[-1] / 2)]
+        
+        lvl[0].append(recorder.blink[-1])
+        lvl[1].append(recorder.attention[-1])
+        lvl[2].append(recorder.meditation[-1])
 
 
 class Screen(object):
@@ -146,20 +149,22 @@ class Screen(object):
         self.uiplot.qwtBarPlot.replot()
 
         # Mindwave levels
-        self.uiplot.progressBar.setValue(lvl[0])
-        self.uiplot.progressBar_2.setValue(lvl[1])
-        self.uiplot.progressBar_3.setValue(lvl[2])
+        if len(lvl[0]) > 0:
+            self.uiplot.progressBar.setValue(int(numpy.mean(lvl[0][-50:])))
+            self.uiplot.progressBar_2.setValue(int(numpy.mean(lvl[1][-50:])))
+            self.uiplot.progressBar_3.setValue(int(numpy.mean(lvl[2][-50:])))
 
         # Recording info
         if record:
-            remaining = (recorder_size - rec_start) % rec_period
-            self.uiplot.pushButton.setText("Recording in %s" % (rec_period - remaining))
-            if remaining == 0:
-                cycle = (recorder_size - rec_start) / rec_period
-                if cycle % 2 == 0:
-                    self.c.setPen(QtGui.QPen(Qt.Qt.darkRed, 1.2))
-                else: 
-                    self.c.setPen(QtGui.QPen(Qt.Qt.blue, 1.2))
+            recording = (recorder_size - rec_start) % rec_period
+            remaining = (rec_period - recording)
+            cycle     = (recorder_size - rec_start) / rec_period
+            
+            self.uiplot.pushButton.setText("Recording in %s" % remaining)
+            if cycle % 2 == 0:
+                self.c.setPen(QtGui.QPen(Qt.Qt.darkRed, 1.2))
+            else: 
+                self.c.setPen(QtGui.QPen(Qt.Qt.blue, 1.2))
 
 
     def plot_messages(self):
@@ -182,19 +187,28 @@ class Screen(object):
         record = not record
 
     def save_record(self):
-        global ys, recorded
+        global ys, flen, recorded
         step = 0
         data = []
+        spec = []
         i = rec_start
         while i + rec_period < rec_stop:
             if step % 2 != 0:
-                data.append(recorded[i:(i+rec_period)])
+                # Cropping the recorded session
+                session = recorded[i:(i+rec_period)]
+                dt, data_spec = bin_power(session, range(flen), 512)
+                data.append(session)
+                spec.append(data_spec)
             i += rec_period
             step += 1
 
-        data = numpy.array(data)
-        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        numpy.savetxt('records/' + now + '.txt', data, delimiter=" ", fmt="%s", newline="\r\n") 
+        if len(data) > 0:
+            data = numpy.array(data)
+            spec = numpy.array(spec)
+            file = str(self.uiplot.lineEdit.text())
+            
+            numpy.savetxt('records/raw/'  + file + '.txt', data, delimiter=" ", fmt="%s", newline="\r\n") 
+            numpy.savetxt('records/spec/' + file + '.txt', spec, delimiter=" ", fmt="%s", newline="\r\n") 
 
     def substr(self, messages):
         """Print cropped message."""

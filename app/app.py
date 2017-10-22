@@ -11,6 +11,7 @@ from random import randint
 from numpy import *
 from view import View
 
+spectrum_mean = False
 
 def has_recorded(recorder):
     return len(recorder.attention) > 0 or len(recorder.meditation) > 0 or len(recorder.blink) > 0
@@ -47,12 +48,17 @@ def main():
             flen = 50
             if len(recorder.raw) >= 500:
                 spectrum, relative_spectrum = bin_power(
-                    recorder.raw[-512 * 3:], range(flen), 512)
-                spectra.append(array(relative_spectrum))
-                if len(spectra) > 30:
-                    spectra.pop(0)
+                    recorder.raw[-512 * 2:], range(flen), 512)
 
-                spectrum = mean(array(spectra), axis=0)
+                # Mostrar a média spectral
+                if spectrum_mean:
+                    spectra.append(array(relative_spectrum))
+                    if len(spectra) > 30:
+                        spectra.pop(0)
+                    spectrum = mean(array(spectra), axis=0)
+                else:
+                    spectrum = relative_spectrum
+
                 view.update_spectrum(spectrum)
             else:
                 pass
@@ -75,7 +81,7 @@ def main():
         else:
             view.print_message("Not receiving any data from mindwave...", "status")
             pass
-        time.sleep(0.01)
+        time.sleep(0.001)
 
 controller = None
 if __name__ == '__main__':
