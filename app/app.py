@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Pygame viewer."""
 import time
+from ai.core import AI
 from mindwave.pyeeg import bin_power
 from mindwave.parser import ThinkGearParser, TimeSeriesRecorder
 from mindwave.bluetooth_headset import BluetoothError
@@ -43,7 +44,8 @@ def main():
             view.print_message("Bluetooth Error", "status")
             pass
         if mock: 
-            mock_data(parser)
+            for _ in range(10):
+                mock_data(parser)
         if has_recorded(recorder):
             flen = 50
             if len(recorder.raw) >= 500:
@@ -62,6 +64,12 @@ def main():
                 view.update_spectrum(spectrum)
             else:
                 pass
+
+            if len(recorder.raw) >= 1024 and len(recorder.raw) % 100 == 0:
+                dt, data_spec = bin_power(recorder.raw[-512:], range(flen), 512)
+                action, proba = ai.predict([data_spec])
+                view.print_action(action, proba)
+                #controller.send_action(action)
 
             view.print_waves(recorder)
             controller.control(recorder)
@@ -83,6 +91,7 @@ def main():
             pass
         time.sleep(0.001)
 
+ai = AI()
 controller = None
 if __name__ == '__main__':
     try:

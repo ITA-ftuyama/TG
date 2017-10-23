@@ -14,6 +14,8 @@ import PyQt4.Qwt5 as Qwt
 # Gui info
 lvl = [[], [], []]
 messages = {}
+actions = ['idle']
+action_msgs = ['idle 1.0']
 flen = 50
 
 # Recording opts
@@ -53,6 +55,12 @@ class View(object):
         messages[kind].append(message)
         if len(messages[kind]) > 50:
             messages[kind].pop(0)
+
+    def print_action(self, action, proba):
+        global actions
+        if action != actions[-1]:
+            actions.append(action)
+            action_msgs.append(action + " %.2f" % proba)
 
     def update_spectrum(self, spectra):
         """Print mind wave spectrum."""
@@ -127,6 +135,7 @@ class Screen(object):
         self.uiplot.bluetooth.setStyleSheet('color: blue')
         self.uiplot.serial.setStyleSheet('color: red')
         self.uiplot.status.setStyleSheet('color: green')
+        self.uiplot.action_label.setStyleSheet('color: green')
 
         # set up button
         self.uiplot.pushButton.clicked.connect(self.record)
@@ -135,7 +144,7 @@ class Screen(object):
         sys.exit(self.app.exec_())
 
     def plot(self):
-        global ys, spectrum, flen, rec_start, recorder_size
+        global ys, spectrum, action, flen, rec_start, recorder_size
         #ys=numpy.roll(ys,-1)
 
         # Real time EEG
@@ -154,6 +163,9 @@ class Screen(object):
             self.uiplot.progressBar_2.setValue(int(numpy.mean(lvl[1][-50:])))
             self.uiplot.progressBar_3.setValue(int(numpy.mean(lvl[2][-50:])))
 
+        # Action info
+        self.uiplot.action_label.setText("[%s]" % ",".join(action_msgs))
+
         # Recording info
         if record:
             recording = (recorder_size - rec_start) % rec_period
@@ -165,6 +177,10 @@ class Screen(object):
                 self.c.setPen(QtGui.QPen(Qt.Qt.darkRed, 1.2))
             else: 
                 self.c.setPen(QtGui.QPen(Qt.Qt.blue, 1.2))
+
+            # Recording is over on 5th period
+            if cycle == 10:
+                self.record()
 
 
     def plot_messages(self):
