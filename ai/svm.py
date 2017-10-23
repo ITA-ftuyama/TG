@@ -4,7 +4,9 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as graph
 
-actions = ["idle", "blink"]
+actions = ["idle", "punchleft"]
+n_sessions = 2
+full_test = True
 
 # Function to read the features from file
 
@@ -98,25 +100,27 @@ def analyse_model():
 		features_test = x1[1];
 
 		model_svc = compute_SVC(features_train,labels_train);
-		test_model(model_svc)
-			#print "train"
+
 		accu_percent_train = compute_accuracy(features_train,labels_train,model_svc)*100;
-			#print "test"
 		accu_percent_test = compute_accuracy(features_test, labels_test,model_svc)*100;
 		train_err = compute_error(features_train, labels_train,model_svc);
 		test_err = compute_error(features_test, labels_test,model_svc);
+		conf_mat = compute_confusion_matrix(features_train,labels_train,model_svc);
+		conf_mat1 = compute_confusion_matrix(features_test,labels_test,model_svc);
+
+		print "%d %% train 	Train Acc %.4f 	Test Acc %.4f" % (input_percent[pri], accu_percent_train, accu_percent_test)
+		#print conf_mat
+		#print conf_mat1
+
 		file_created1.write("%f %f %f \n" %(accu_percent_train, accu_percent_test, input_percent[pri]))
 		file_created2.write("%f %f %f \n" %(train_err,test_err, input_percent[pri]))
 
 	file_created1.close()
 	file_created2.close()
 
-	conf_mat = compute_confusion_matrix(features_train,labels_train,model_svc);
-	print conf_mat
-	conf_mat1 = compute_confusion_matrix(features_test,labels_test,model_svc);
-	print conf_mat1
+	construct_svm()
 	compute_plot("results/Generated_accuracy_table.dat");
-	compute_plot("results/Generated_error_table.dat");
+	#compute_plot("results/Generated_error_table.dat");
 
 # Test the generated model
 
@@ -125,7 +129,7 @@ def test_model(model_svc):
 	accu_percent = compute_accuracy(features, labels, model_svc) * 100
 	conf_mat = compute_confusion_matrix(features,labels,model_svc);
 
-	print "Accuracy obtained over the whole training set is %0.6f %% ." % (accu_percent)
+	print "Accuracy obtained over the whole training set is %0.4f %% ." % (accu_percent)
 	print conf_mat
 
 	#print model_svc.predict_proba([features[0]])
@@ -136,7 +140,7 @@ def read_input():
 	global actions, features, labels
 	path =  "../app/records/spec/"
 	features, labels = [], []
-	for session in range(4):
+	for session in range(n_sessions):
 		for i, action in enumerate(actions):
 			sub_features, sub_labels = read_features(path + action + "_" + str(session) + ".txt", i)
 			features += sub_features
@@ -151,4 +155,7 @@ def construct_svm():
 	return model_svc
 
 if __name__ == "__main__":
-	analyse_model()
+	if full_test:
+		analyse_model()
+	else:
+		construct_svm()

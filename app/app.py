@@ -33,6 +33,7 @@ def main():
     mock = True
     spectra = []
     spectrum_mean = False
+    prediction = True
     iteration = 0
 
     while view.screen.quit is False:   
@@ -65,7 +66,7 @@ def main():
             else:
                 pass
 
-            if len(recorder.raw) >= 1024 and iteration % 5 == 0:
+            if prediction and len(recorder.raw) >= 1024 and iteration % 5 == 0:
                 dt, data_spec = bin_power(recorder.raw[-512:], range(flen), 512)
                 action, proba = ai.predict([data_spec])
                 view.print_action(action, proba)
