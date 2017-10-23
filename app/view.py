@@ -16,6 +16,7 @@ lvl = [[], [], []]
 messages = {}
 actions = ['idle']
 action_msgs = ['idle 1.0']
+intention = 'idle 1.0'
 flen = 50
 
 # Recording opts
@@ -24,6 +25,7 @@ rec_start = 0
 rec_stop = 0
 rec_period = 1024
 recorder_size = 0
+over = False
 recorded = []
 
 
@@ -36,8 +38,7 @@ class View(object):
         messages = {
             "bluetooth": [],
             "serial": [],
-            "status": [],
-            "sser_data": []
+            "status": []
         }
         xs=numpy.arange(self.numPoints)
         ys=numpy.sin(3.14159*xs*10/self.numPoints) #this is our data
@@ -57,8 +58,9 @@ class View(object):
             messages[kind].pop(0)
 
     def print_action(self, action, proba):
-        global actions
-        if action != actions[-1]:
+        global actions, intention
+        intention = action + " %.2f" % proba
+        if proba > 0.5 and action != actions[-1]:
             actions.append(action)
             action_msgs.append(action + " %.2f" % proba)
 
@@ -135,7 +137,9 @@ class Screen(object):
         self.uiplot.bluetooth.setStyleSheet('color: blue')
         self.uiplot.serial.setStyleSheet('color: red')
         self.uiplot.status.setStyleSheet('color: green')
+        self.uiplot.intention_label.setStyleSheet('color: blue')
         self.uiplot.action_label.setStyleSheet('color: green')
+        self.uiplot.action_label.setWordWrap(True)
 
         # set up button
         self.uiplot.pushButton.clicked.connect(self.record)
@@ -144,7 +148,7 @@ class Screen(object):
         sys.exit(self.app.exec_())
 
     def plot(self):
-        global ys, spectrum, action, flen, rec_start, recorder_size
+        global ys, over, spectrum, flen, rec_start, recorder_size
         #ys=numpy.roll(ys,-1)
 
         # Real time EEG
@@ -163,9 +167,6 @@ class Screen(object):
             self.uiplot.progressBar_2.setValue(int(numpy.mean(lvl[1][-50:])))
             self.uiplot.progressBar_3.setValue(int(numpy.mean(lvl[2][-50:])))
 
-        # Action info
-        self.uiplot.action_label.setText("[%s]" % ",".join(action_msgs))
-
         # Recording info
         if record:
             recording = (recorder_size - rec_start) % rec_period
@@ -180,18 +181,23 @@ class Screen(object):
 
             # Recording is over on 5th period
             if cycle == 10:
+                over = True
                 self.record()
 
 
     def plot_messages(self):
-        global messages
+        global messages, action, intention
+        # Messages info
         self.uiplot.bluetooth.setText("[Bluetooth]: %s" % self.substr(messages["bluetooth"]))
         self.uiplot.serial.setText("[Serial]: %s" % self.substr(messages["serial"]))
         self.uiplot.status.setText("[Errors]: %s" % self.substr(messages["status"]))
-        self.uiplot.data.setText("[Data]: %s" % self.substr(messages["sser_data"]))
+
+        # Action info
+        self.uiplot.intention_label.setText("Intentions: [%s]" % intention)
+        self.uiplot.action_label.setText("Actions:      [%s]" % ", ".join(action_msgs))
 
     def record(self):
-        global record, rec_start, rec_stop, recorder_size
+        global record, over, rec_start, rec_stop, recorder_size
         if not record:
             self.uiplot.pushButton.setText("Recording")
             rec_start = recorder_size
@@ -199,8 +205,10 @@ class Screen(object):
             self.uiplot.pushButton.setText("Not Recording")
             self.c.setPen(QtGui.QPen(Qt.Qt.darkRed, 1.2))
             rec_stop = recorder_size
-            self.save_record()
+            if over:
+                self.save_record()
         record = not record
+        over = False
 
     def save_record(self):
         global ys, flen, recorded

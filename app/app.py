@@ -12,8 +12,6 @@ from random import randint
 from numpy import *
 from view import View
 
-spectrum_mean = False
-
 def has_recorded(recorder):
     return len(recorder.attention) > 0 or len(recorder.meditation) > 0 or len(recorder.blink) > 0
 
@@ -34,6 +32,8 @@ def main():
 
     mock = True
     spectra = []
+    spectrum_mean = False
+    iteration = 0
 
     while view.screen.quit is False:   
         try:
@@ -65,7 +65,7 @@ def main():
             else:
                 pass
 
-            if len(recorder.raw) >= 1024 and len(recorder.raw) % 100 == 0:
+            if len(recorder.raw) >= 1024 and iteration % 5 == 0:
                 dt, data_spec = bin_power(recorder.raw[-512:], range(flen), 512)
                 action, proba = ai.predict([data_spec])
                 view.print_action(action, proba)
@@ -89,7 +89,8 @@ def main():
         else:
             view.print_message("Not receiving any data from mindwave...", "status")
             pass
-        time.sleep(0.001)
+        iteration += 1
+        time.sleep(0.05)
 
 ai = AI()
 controller = None

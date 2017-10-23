@@ -85,7 +85,7 @@ def analyse_model():
 	global features, labels
 	read_input()
 
-	input_percent = [40, 50, 60, 70, 80, 90]
+	input_percent = [20, 30, 40, 50, 60, 70, 80, 90]
 	file_created1 = open('results/Generated_accuracy_table.dat','w')
 	file_created2 = open('results/Generated_error_table.dat','w')
 

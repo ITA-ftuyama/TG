@@ -29,7 +29,7 @@ class DataSerial:
     def send_ser(self, num):
         """Send number using serial."""
         y_string = self.string_number(num)
-        self.view.add_message(y_string.rstrip(), "sser_data")
+        #self.view.add_message(y_string.rstrip(), "sser_data")
         self.ser.write(y_string)
 
     def close_ser(self):

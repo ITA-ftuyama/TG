@@ -52,7 +52,7 @@ def mindwave_startup(view=None, description="", extra_args=[]):
         try:
             if i > 0:
                 view.print_message("Retrying...", "bluetooth")
-            time.sleep(2)
+            time.sleep(1)
             len(socket.recv(10))
             break
         except BluetoothError, e:
