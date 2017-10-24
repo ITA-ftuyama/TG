@@ -66,7 +66,7 @@ def main():
             else:
                 pass
 
-            if prediction and len(recorder.raw) >= 1024 and iteration % 5 == 0:
+            if prediction and len(recorder.raw) >= 1024 and iteration % 10 == 0:
                 dt, data_spec = bin_power(recorder.raw[-512:], range(flen), 512)
                 action, proba = ai.predict([data_spec])
                 view.print_action(action, proba)
@@ -91,7 +91,7 @@ def main():
             view.print_message("Not receiving any data from mindwave...", "status")
             pass
         iteration += 1
-        time.sleep(0.05)
+        time.sleep(0.01)
 
 ai = AI()
 controller = None

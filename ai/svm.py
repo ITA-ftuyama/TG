@@ -5,7 +5,7 @@ from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as graph
 
 actions = ["idle", "punchleft"]
-n_sessions = 2
+n_sessions = 6
 full_test = True
 
 # Function to read the features from file
@@ -87,7 +87,7 @@ def analyse_model():
 	global features, labels
 	read_input()
 
-	input_percent = [20, 30, 40, 50, 60, 70, 80, 90]
+	input_percent = [20, 30, 40, 50, 60, 70, 80]
 	file_created1 = open('results/Generated_accuracy_table.dat','w')
 	file_created2 = open('results/Generated_error_table.dat','w')
 

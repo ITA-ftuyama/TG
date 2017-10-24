@@ -107,8 +107,8 @@ class Screen(object):
         self.uiplot.setupUi(self.win_plot)
 
         # tell buttons what to do when clicked
-        self.uiplot.btnA.clicked.connect(self.plot)
-        self.uiplot.btnB.clicked.connect(lambda: self.uiplot.timer.setInterval(100.0))
+        self.uiplot.btnA.clicked.connect(lambda: self.uiplot.timer.setInterval(100.0))
+        self.uiplot.btnB.clicked.connect(lambda: self.uiplot.timer.setInterval(50.0))
         self.uiplot.btnC.clicked.connect(lambda: self.uiplot.timer.setInterval(10.0))
         self.uiplot.btnD.clicked.connect(lambda: self.uiplot.timer.setInterval(1.0))
 
@@ -127,7 +127,7 @@ class Screen(object):
 
         # set up timer to replot
         self.uiplot.timer = QtCore.QTimer() #start a timer (to call replot events)
-        self.uiplot.timer.start(10.0) #set the interval (in ms)
+        self.uiplot.timer.start(50.0) #set the interval (in ms)
         self.win_plot.connect(self.uiplot.timer, QtCore.SIGNAL('timeout()'), self.plot)
 
         # plot messages
@@ -194,7 +194,7 @@ class Screen(object):
 
         # Action info
         self.uiplot.intention_label.setText("Intentions: [%s]" % intention)
-        self.uiplot.action_label.setText("Actions:      [%s]" % ", ".join(action_msgs))
+        self.uiplot.action_label.setText("Actions:      [%s]" % self.substr(action_msgs))
 
     def record(self):
         global record, over, rec_start, rec_stop, recorder_size

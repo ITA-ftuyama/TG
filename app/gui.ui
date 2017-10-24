@@ -43,7 +43,7 @@
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Dados em tempo real&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Real Time Data&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
@@ -57,7 +57,7 @@
         <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Análise espectral&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Spectral Analysis&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
@@ -77,14 +77,14 @@
         <item>
          <widget class="QGroupBox" name="groupBox_2">
           <property name="title">
-           <string>Niveis Mindwave</string>
+           <string>Mindwave Levels</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_6">
           <property name="text">
-           <string>Piscada</string>
+           <string>Blink</string>
           </property>
          </widget>
         </item>
@@ -98,7 +98,7 @@
         <item>
          <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>Atenção</string>
+           <string>Attention</string>
           </property>
          </widget>
         </item>
@@ -112,7 +112,7 @@
         <item>
          <widget class="QLabel" name="label_7">
           <property name="text">
-           <string>Meditação</string>
+           <string>Meditation</string>
           </property>
          </widget>
         </item>
@@ -136,7 +136,7 @@
           </property>
          </spacer>
         </item>
-        <item alignment="Qt::AlignTop">
+        <item>
          <widget class="QLabel" name="label_10">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -151,14 +151,14 @@
            </size>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Ações emitidas&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Predicted Actions&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QLabel" name="intention_label">
           <property name="text">
-           <string>intenção</string>
+           <string>intention</string>
           </property>
          </widget>
         </item>
@@ -252,28 +252,28 @@
       <item>
        <widget class="QPushButton" name="btnA">
         <property name="text">
-         <string>A</string>
+         <string>x0.5</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="btnB">
         <property name="text">
-         <string>B</string>
+         <string>x1</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="btnC">
         <property name="text">
-         <string>C</string>
+         <string>x10</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="btnD">
         <property name="text">
-         <string>D</string>
+         <string>x100</string>
         </property>
        </widget>
       </item>
@@ -299,7 +299,7 @@
         <item>
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Log de mensagens&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Messages Log&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
