@@ -11,11 +11,11 @@ html5lib==0.9999999
 Markdown==2.6.9
 matplotlib==1.5.1
 mock==2.0.0
-numpy==1.13.1
+numpy==1.11.0
 pandas==0.20.3
 pbr==3.1.1
 Pillow==3.1.2
-protobuf==3.4.0
+protobuf==3.0.0a3
 PyAutoGUI==0.9.36
 PyBluez==0.22
 pygame==1.9.3
@@ -31,10 +31,11 @@ PyTweening==1.0.3
 pytz==2017.2
 scikit-learn==0.19.0
 scipy==0.19.1
-six==1.10.0
+six==1.11.0
 skflow==0.1.0
 sklearn==0.0
 subprocess32==3.2.7
+tensorflow==0.6.0
 tensorflow-tensorboard==0.1.8
 unity-lens-photos==1.0
 Werkzeug==0.12.2

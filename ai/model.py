@@ -5,6 +5,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as graph
+from sklearn import datasets, metrics
 import skflow
 import sys
 
@@ -43,29 +44,12 @@ def compute_SVC(train_f, train_l):
 # Function to compute the classification using Deeplearning
 
 def compute_DNN(train_f, train_l):
-	test_f = train_f[:len(train_f)/2]
-	train_f = train_f[len(train_f)/2:]
-
-	test_l = train_l[:len(train_l)/2]
-	train_l = train_l[len(train_l)/2:]
-
-
-	feature_columns = [tf.feature_column.numeric_column("x", shape=[49])]
-	tf.logging.set_verbosity(tf.logging.ERROR)
-	c = learn.DNNClassifier(feature_columns=feature_columns, hidden_units=[10, 20, 10])
-	train_input_fn = tf.estimator.inputs.numpy_input_fn(
-      x={"x": n.array(train_f, dtype=n.float32)},
-      y=n.array(train_l, dtype=n.int),
-      shuffle=True)
-	c.fit(input_fn=train_input_fn, steps=20)
-
-
-  	test_input_fn = tf.estimator.inputs.numpy_input_fn(
-      x={"x": n.array(test_f, dtype=n.float32)},
-      y=n.array(test_l, dtype=n.int),
-      shuffle=True)
-  	accuracy_score = c.evaluate(input_fn=test_input_fn)["accuracy"]
-  	print("\nTest Accuracy: {0:f}\n".format(accuracy_score))
+	train_f = pd.DataFrame(train_f, dtype=n.float32)
+	train_l = n.array(train_l, dtype=n.int)
+  	c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 10], n_classes=3)
+	iris = datasets.load_iris()
+	c.fit(iris.data, iris.target)
+	#c.fit(train_f, train_l)
 	return c
 
 # Function to calculate the accuracy
