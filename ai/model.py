@@ -1,16 +1,13 @@
 import numpy as n
-import pandas as pd
 from sklearn import svm
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as graph
-from sklearn import datasets, metrics
 import skflow
 import sys
 
-actions = ["idle", "punchleft"]
-n_sessions = 2
+actions = ["idle", "blink"]
+n_sessions = 6
 full_test = True
 
 # Function to read the features from file
@@ -44,18 +41,14 @@ def compute_SVC(train_f, train_l):
 # Function to compute the classification using Deeplearning
 
 def compute_DNN(train_f, train_l):
-	train_f = pd.DataFrame(train_f, dtype=n.float32)
-	train_l = n.array(train_l, dtype=n.int)
-  	c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 10], n_classes=3)
-	iris = datasets.load_iris()
-	c.fit(iris.data, iris.target)
-	#c.fit(train_f, train_l)
+	c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 20, 10], n_classes=2, learning_rate=0.1)
+	c.fit(cast(train_f), train_l)
 	return c
 
 # Function to calculate the accuracy
 
 def compute_accuracy(test_f, test_l, c):
-	pred = c.predict(test_f)
+	pred = c.predict(cast(test_f))
 	#print pred
 	pred_accu = accuracy_score(test_l, pred)
 	return pred_accu
@@ -63,14 +56,14 @@ def compute_accuracy(test_f, test_l, c):
 # Function to compute the confusion matrix
 
 def compute_confusion_matrix(test_f, test_l, c):
-	pred = c.predict(test_f)
+	pred = c.predict(cast(test_f))
 	x = confusion_matrix(test_l, pred)
 	return x
 
 # Function to compute the error
 
 def compute_error(t_f,t_l,c):
-	err = 1 - c.score(t_f,t_l)
+	err = 1 - c.score(cast(t_f),t_l)
 	return err;
 
 # Function to split the data based on percentage
@@ -79,6 +72,12 @@ def split_data(f,percent):
 	tot = len(f)
 	req_xt = int((float(percent)/100)*(tot))
 	return [f[0:(req_xt-1)], f[req_xt:tot]]
+
+# Cast to avoid mimimi
+
+def cast(a):
+	global m
+	return a if m != "dnn" else n.array(a, dtype=n.float32)
 
 # Function to plot the training and testing errors
 
@@ -173,13 +172,12 @@ def read_input():
 # Compute model
 
 def compute_model(method, f, l):
-	if method == "svm":
-		model = compute_SVC(f, l)
-	elif method == "k":
-		model = compute_KNeighbors(f, l)
-	else:
-		model = compute_DNN(f, l)
-	return model
+	global m; m = method
+	return {
+		'svm': compute_SVC,
+		'k': compute_KNeighbors,
+		'dnn': compute_DNN
+	}.get(method, None)(f, l)
 
 # Construct SVM model
 
