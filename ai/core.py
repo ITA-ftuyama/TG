@@ -1,7 +1,6 @@
 
 
-from svm import construct_model
-from svm import actions
+from model import construct_model, actions
 
 class AI(object):
 

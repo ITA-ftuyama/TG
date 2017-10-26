@@ -93,7 +93,7 @@ def main():
         iteration += 1
         time.sleep(0.01)
 
-ai = AI()
+ai = AI("k")
 controller = None
 if __name__ == '__main__':
     try:

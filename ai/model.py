@@ -1,13 +1,15 @@
 import numpy as n
+import pandas as pd
 from sklearn import svm
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as graph
+import skflow
 import sys
 
 actions = ["idle", "punchleft"]
-n_sessions = 6
+n_sessions = 2
 full_test = True
 
 # Function to read the features from file
@@ -36,6 +38,34 @@ def compute_SVC(train_f, train_l):
 		decision_function_shape = None, degree = 3, gamma = 'auto', kernel='linear', max_iter = -1,
 		probability = True, random_state = None, shrinking = True, tol = 0.001, verbose = False)
 	c.fit(train_f, train_l)
+	return c
+
+# Function to compute the classification using Deeplearning
+
+def compute_DNN(train_f, train_l):
+	test_f = train_f[:len(train_f)/2]
+	train_f = train_f[len(train_f)/2:]
+
+	test_l = train_l[:len(train_l)/2]
+	train_l = train_l[len(train_l)/2:]
+
+
+	feature_columns = [tf.feature_column.numeric_column("x", shape=[49])]
+	tf.logging.set_verbosity(tf.logging.ERROR)
+	c = learn.DNNClassifier(feature_columns=feature_columns, hidden_units=[10, 20, 10])
+	train_input_fn = tf.estimator.inputs.numpy_input_fn(
+      x={"x": n.array(train_f, dtype=n.float32)},
+      y=n.array(train_l, dtype=n.int),
+      shuffle=True)
+	c.fit(input_fn=train_input_fn, steps=20)
+
+
+  	test_input_fn = tf.estimator.inputs.numpy_input_fn(
+      x={"x": n.array(test_f, dtype=n.float32)},
+      y=n.array(test_l, dtype=n.int),
+      shuffle=True)
+  	accuracy_score = c.evaluate(input_fn=test_input_fn)["accuracy"]
+  	print("\nTest Accuracy: {0:f}\n".format(accuracy_score))
 	return c
 
 # Function to calculate the accuracy
@@ -159,7 +189,13 @@ def read_input():
 # Compute model
 
 def compute_model(method, f, l):
-	return compute_SVC(f, l) if method == "svm" else compute_KNeighbors(f, l)
+	if method == "svm":
+		model = compute_SVC(f, l)
+	elif method == "k":
+		model = compute_KNeighbors(f, l)
+	else:
+		model = compute_DNN(f, l)
+	return model
 
 # Construct SVM model
 
