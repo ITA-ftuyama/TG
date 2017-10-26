@@ -1,13 +1,13 @@
 
 
-from svm import construct_svm
+from svm import construct_model
 from svm import actions
 
 class AI(object):
 
-    def __init__(self, kind="SVM"):
+    def __init__(self, kind="svm"):
         """Initializes the Controller."""
-        self.model = construct_svm()
+        self.model = construct_model(kind)
 
     def predict(self, data):
         """Predict some action."""

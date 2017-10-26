@@ -2,7 +2,9 @@ import numpy as n
 from sklearn import svm
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
+from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as graph
+import sys
 
 actions = ["idle", "punchleft"]
 n_sessions = 6
@@ -19,6 +21,13 @@ def read_features(par_filename, label):
 			ll.append(label)
 	file_lines.close()
 	return (vl, ll)
+
+# Function to compute the classification using KNeighbors
+
+def compute_KNeighbors(train_f, train_l):
+  c = KNeighborsClassifier(n_neighbors=5)
+  c.fit(train_f, train_l)
+  return c
 
 # Function to compute the classification using SVM
 
@@ -47,7 +56,7 @@ def compute_confusion_matrix(test_f, test_l, c):
 # Function to compute the error
 
 def compute_error(t_f,t_l,c):
-	err = c.score(t_f,t_l)
+	err = 1 - c.score(t_f,t_l)
 	return err;
 
 # Function to split the data based on percentage
@@ -70,20 +79,20 @@ def compute_plot(filename):
 			percent_plt.append(c1.split()[2])
 	fig = graph.figure()
 	ax = fig.add_subplot(111)
-	graph.plot(percent_plt, test_plt, 'bo', label='Training Error')
-	graph.plot(percent_plt, train_plt, 'ro', label='Testing Error')
+	graph.plot(percent_plt, test_plt, 'bo', label='Training Accuracy')
+	graph.plot(percent_plt, train_plt, 'ro', label='Testing Accuracy')
 	graph.plot(percent_plt, test_plt, 'b')
 	graph.plot(percent_plt, train_plt, 'r')
 	ax.set_xlabel('Percentage of Taining data')
-	ax.set_ylabel('Percentage of Error')
+	ax.set_ylabel('Accuracy (%)')
 	graph.legend( loc='upper left', numpoints = 1 )
-	graph.title("% Error Vs % training Data")
+	graph.title("% Accuracy Vs % training Data")
 	graph.show()
 	return;
 
 # Analyse the model
 
-def analyse_model():
+def analyse_model(method):
 	global features, labels
 	read_input()
 
@@ -99,14 +108,14 @@ def analyse_model():
 		labels_test = x2[1];
 		features_test = x1[1];
 
-		model_svc = compute_SVC(features_train,labels_train);
+		model = compute_model(method, features_train,labels_train);
 
-		accu_percent_train = compute_accuracy(features_train,labels_train,model_svc)*100;
-		accu_percent_test = compute_accuracy(features_test, labels_test,model_svc)*100;
-		train_err = compute_error(features_train, labels_train,model_svc);
-		test_err = compute_error(features_test, labels_test,model_svc);
-		conf_mat = compute_confusion_matrix(features_train,labels_train,model_svc);
-		conf_mat1 = compute_confusion_matrix(features_test,labels_test,model_svc);
+		accu_percent_train = compute_accuracy(features_train,labels_train,model)*100;
+		accu_percent_test = compute_accuracy(features_test, labels_test,model)*100;
+		train_err = compute_error(features_train, labels_train,model);
+		test_err = compute_error(features_test, labels_test,model);
+		conf_mat = compute_confusion_matrix(features_train,labels_train,model);
+		conf_mat1 = compute_confusion_matrix(features_test,labels_test,model);
 
 		print "%d %% train 	Train Acc %.4f 	Test Acc %.4f" % (input_percent[pri], accu_percent_train, accu_percent_test)
 		#print conf_mat
@@ -118,21 +127,21 @@ def analyse_model():
 	file_created1.close()
 	file_created2.close()
 
-	construct_svm()
+	construct_model(method)
 	compute_plot("results/Generated_accuracy_table.dat");
 	#compute_plot("results/Generated_error_table.dat");
 
 # Test the generated model
 
-def test_model(model_svc):
+def test_model(model):
 	global features, labels
-	accu_percent = compute_accuracy(features, labels, model_svc) * 100
-	conf_mat = compute_confusion_matrix(features,labels,model_svc);
+	accu_percent = compute_accuracy(features, labels, model) * 100
+	conf_mat = compute_confusion_matrix(features,labels,model);
 
 	print "Accuracy obtained over the whole training set is %0.4f %% ." % (accu_percent)
 	print conf_mat
 
-	#print model_svc.predict_proba([features[0]])
+	#print model.predict_proba([features[0]])
 
 # Starting of the flow of program
 
@@ -146,16 +155,21 @@ def read_input():
 			features += sub_features
 			labels   += sub_labels
 
+
+# Compute model
+
+def compute_model(method, f, l):
+	return compute_SVC(f, l) if method == "svm" else compute_KNeighbors(f, l)
+
 # Construct SVM model
 
-def construct_svm():
-	read_input()   
-	model_svc = compute_SVC(features, labels)
-	test_model(model_svc)
-	return model_svc
+def construct_model(method):
+	read_input()
+	model = compute_model(method, features, labels)
+	test_model(model)
+	return model
 
 if __name__ == "__main__":
+	method = "svm" if len(sys.argv) == 1 else sys.argv[1]
 	if full_test:
-		analyse_model()
-	else:
-		construct_svm()
+		analyse_model(method)
