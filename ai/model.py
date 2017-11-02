@@ -6,8 +6,9 @@ import matplotlib.pyplot as graph
 import skflow
 import sys
 
+default = "k"
 actions = ["idle", "blink"]
-n_sessions = 6
+n_sessions = 10
 full_test = True
 
 # Function to read the features from file
@@ -41,7 +42,7 @@ def compute_SVC(train_f, train_l):
 # Function to compute the classification using Deeplearning
 
 def compute_DNN(train_f, train_l):
-	c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 20, 10], n_classes=2, learning_rate=0.1)
+	c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 20, 10], n_classes=2, learning_rate=0.1, verbose=0)
 	c.fit(cast(train_f), train_l)
 	return c
 
@@ -188,6 +189,6 @@ def construct_model(method):
 	return model
 
 if __name__ == "__main__":
-	method = "svm" if len(sys.argv) == 1 else sys.argv[1]
+	method = default if len(sys.argv) == 1 else sys.argv[1]
 	if full_test:
 		analyse_model(method)
