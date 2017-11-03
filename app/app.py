@@ -67,8 +67,11 @@ def main():
                 pass
 
             if prediction and len(recorder.raw) >= 1024 and iteration % 5 == 0:
-                dt, data_spec = bin_power(recorder.raw[-512:], range(flen), 512)
-                action, proba = ai.predict([data_spec])
+                if ai.kind == "raw":
+                    action, proba = ai.predict(array([array(recorder.raw[-1024:], dtype=float32)]))
+                else:
+                    dt, data_spec = bin_power(recorder.raw[-512:], range(flen), 512)
+                    action, proba = ai.predict(array([data_spec]))
                 view.print_action(action, proba)
                 #controller.send_action(action)
 
@@ -93,7 +96,7 @@ def main():
         iteration += 1
         time.sleep(0.01)
 
-ai = AI("k")
+ai = AI()
 controller = None
 if __name__ == '__main__':
     try:

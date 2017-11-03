@@ -1,16 +1,16 @@
-
-
-from model import construct_model, actions
+from sklearn import preprocessing
+from model import constructor, actions
 
 class AI(object):
 
-    def __init__(self, kind="svm"):
+    def __init__(self):
         """Initializes the Controller."""
-        print "Using %s classification algorithm" % kind
-        self.model = construct_model(kind)
+        self.model, self.method, self.kind = constructor()
+        print "Using %s classification algorithm with %s data" % (self.method, self.kind)
 
     def predict(self, data):
         """Predict some action."""
+        data = preprocessing.normalize(data, norm='l2')
         prediction = self.model.predict(data)[0]
         proba = self.model.predict_proba(data)[0][prediction]
         return (actions[prediction], proba)

@@ -1,15 +1,17 @@
 import numpy as n
-from sklearn import svm
+from sklearn import svm, preprocessing
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as graph
 import skflow
 import sys
 
-default = "k"
-actions = ["idle", "blink"]
+kind = "spec"
+default = "dnn"
+actions = ["idle", "blink", "punchleft"]
 n_sessions = 10
 full_test = True
+normalize = True
 
 # Function to read the features from file
 
@@ -26,7 +28,7 @@ def read_features(par_filename, label):
 # Function to compute the classification using KNeighbors
 
 def compute_KNeighbors(train_f, train_l):
-  c = KNeighborsClassifier(n_neighbors=5)
+  c = KNeighborsClassifier(n_neighbors=7)
   c.fit(train_f, train_l)
   return c
 
@@ -42,7 +44,7 @@ def compute_SVC(train_f, train_l):
 # Function to compute the classification using Deeplearning
 
 def compute_DNN(train_f, train_l):
-	c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 20, 10], n_classes=2, learning_rate=0.1, verbose=0)
+	c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 20, 10], n_classes=len(actions), learning_rate=0.1, verbose=0)
 	c.fit(cast(train_f), train_l)
 	return c
 
@@ -106,9 +108,9 @@ def compute_plot(filename):
 
 # Analyse the model
 
-def analyse_model(method):
+def analyse_model(method, kind):
 	global features, labels
-	read_input()
+	read_input(kind)
 
 	input_percent = [20, 30, 40, 50, 60, 70, 80]
 	file_created1 = open('results/Generated_accuracy_table.dat','w')
@@ -141,7 +143,7 @@ def analyse_model(method):
 	file_created1.close()
 	file_created2.close()
 
-	construct_model(method)
+	construct_model(method, kind)
 	compute_plot("results/Generated_accuracy_table.dat");
 	#compute_plot("results/Generated_error_table.dat");
 
@@ -159,9 +161,9 @@ def test_model(model):
 
 # Starting of the flow of program
 
-def read_input():
+def read_input(kind):
 	global actions, features, labels
-	path =  "../app/records/spec/"
+	path =  "../app/records/%s/" % kind
 	features, labels = [], []
 	for session in range(n_sessions):
 		for i, action in enumerate(actions):
@@ -169,6 +171,8 @@ def read_input():
 			features += sub_features
 			labels   += sub_labels
 
+	if normalize:
+		features = preprocessing.normalize(features, norm='l2')
 
 # Compute model
 
@@ -180,15 +184,22 @@ def compute_model(method, f, l):
 		'dnn': compute_DNN
 	}.get(method, None)(f, l)
 
-# Construct SVM model
+# Construct classification model
 
-def construct_model(method):
-	read_input()
+def construct_model(method, kind):
+	read_input(kind)
 	model = compute_model(method, features, labels)
 	test_model(model)
 	return model
 
+# Constructor
+
+def constructor():
+	return construct_model(default, kind), default, kind
+
+
 if __name__ == "__main__":
 	method = default if len(sys.argv) == 1 else sys.argv[1]
+	global m; m = method
 	if full_test:
-		analyse_model(method)
+		analyse_model(method, kind)
