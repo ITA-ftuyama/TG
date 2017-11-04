@@ -8,7 +8,7 @@ import sys
 
 kind = "spec"
 default = "dnn"
-actions = ["idle", "blink", "punchleft"]
+actions = ["idle", "blink"]
 n_sessions = 10
 full_test = True
 normalize = True
@@ -109,6 +109,50 @@ def compute_plot(filename):
 # Analyse the model
 
 def analyse_model(method, kind):
+	global features, labels
+	read_input(kind)
+
+	input_percent = [20, 30, 40, 50, 60, 70, 80]
+	file_created1 = open('results/Generated_accuracy_table.dat','w')
+	file_created2 = open('results/Generated_error_table.dat','w')
+
+	# Takes last 20% as validation data
+	features_test = split_data(features, 80)[1];
+	labels_test = split_data(labels, 80)[1];
+
+	for pri in range(0,len(input_percent)):
+		features_train = split_data(features, input_percent[pri])[0];
+		labels_train = split_data(labels, input_percent[pri])[0];
+
+		model = compute_model(method, features_train,labels_train);
+
+		accu_percent_train = compute_accuracy(features_train,labels_train,model)*100;
+		accu_percent_test = compute_accuracy(features_test, labels_test,model)*100;
+		train_err = compute_error(features_train, labels_train,model);
+		test_err = compute_error(features_test, labels_test,model);
+		conf_mat = compute_confusion_matrix(features_train,labels_train,model);
+		conf_mat1 = compute_confusion_matrix(features_test,labels_test,model);
+
+		print "%d %% train 	Train Acc %.4f 	Test Acc %.4f" % (input_percent[pri], accu_percent_train, accu_percent_test)
+		if input_percent[pri] == 80:
+			print "Conf. matrix training"
+			print conf_mat
+			print "Conf. matrix validation"
+			print conf_mat1
+
+		file_created1.write("%f %f %f \n" %(accu_percent_train, accu_percent_test, input_percent[pri]))
+		file_created2.write("%f %f %f \n" %(train_err,test_err, input_percent[pri]))
+
+	file_created1.close()
+	file_created2.close()
+
+	construct_model(method, kind)
+	compute_plot("results/Generated_accuracy_table.dat");
+	#compute_plot("results/Generated_error_table.dat");
+
+# Compare training % (what old code really does)
+
+def analyse_training_percent(method, kind):
 	global features, labels
 	read_input(kind)
 
