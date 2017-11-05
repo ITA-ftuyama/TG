@@ -6,10 +6,10 @@ import matplotlib.pyplot as graph
 import skflow
 import sys
 
-kind = "spec"
-default = "dnn"
-actions = ["idle", "blink"]
-n_sessions = 10
+kind = ["raw", "spec"][1]
+default = ["svm", "k", "dnn"][2]
+actions = ["idle", "closedeyes"]
+n_sessions = 15
 full_test = True
 normalize = True
 
@@ -211,7 +211,7 @@ def read_input(kind):
 	features, labels = [], []
 	for session in range(n_sessions):
 		for i, action in enumerate(actions):
-			sub_features, sub_labels = read_features(path + action + "_" + str(session) + ".txt", i)
+			sub_features, sub_labels = read_features(path + action + "/" + action + "_" + str(session) + ".txt", i)
 			features += sub_features
 			labels   += sub_labels
 
