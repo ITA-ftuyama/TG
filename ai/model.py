@@ -3,12 +3,13 @@ from sklearn import svm, preprocessing
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as graph
+import random
 import skflow
 import sys
 
 kind = ["raw", "spec"][1]
-default = ["svm", "k", "dnn"][2]
-actions = ["idle", "closedeyes"]
+default = ["svm", "k", "dnn"][0]
+actions = ["idle", "blink"]
 n_sessions = 15
 full_test = True
 normalize = True
@@ -115,6 +116,11 @@ def analyse_model(method, kind):
 	input_percent = [20, 30, 40, 50, 60, 70, 80]
 	file_created1 = open('results/Generated_accuracy_table.dat','w')
 	file_created2 = open('results/Generated_error_table.dat','w')
+
+	# Shuffle data order
+	c = list(zip(features, labels))
+	random.shuffle(c)
+	features, labels = zip(*c)
 
 	# Takes last 20% as validation data
 	features_test = split_data(features, 80)[1];
