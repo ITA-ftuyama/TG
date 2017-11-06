@@ -7,12 +7,14 @@ import random
 import skflow
 import sys
 
-kind = ["raw", "spec"][1]
+kind = ["raw", "spec"][0]
 default = ["svm", "k", "dnn"][0]
 actions = ["idle", "blink"]
 n_sessions = 15
+ten_time = True
 full_test = True
 normalize = True
+times = 10
 
 # Function to read the features from file
 
@@ -106,6 +108,36 @@ def compute_plot(filename):
 	graph.title("% Accuracy Vs % training Data")
 	graph.show()
 	return;
+
+# Computes mean accy
+
+def ten_times(method, kind):
+	global features, labels
+	read_input(kind)
+
+	accu_percent_train = 0
+	accu_percent_test = 0
+
+	for i in range(times):
+		# Shuffle data order
+		c = list(zip(features, labels))
+		random.shuffle(c)
+		features, labels = zip(*c)
+
+		# Takes last 20% as validation data
+		features_train, features_test = split_data(features, 80)
+		labels_train, labels_test = split_data(labels, 80)
+
+		model = compute_model(method, features_train,labels_train);
+
+		accu_percent_train += compute_accuracy(features_train,labels_train,model)*100;
+		accu_percent_test += compute_accuracy(features_test, labels_test,model)*100;
+
+	accu_percent_train = accu_percent_train / (times * 1.0)
+	accu_percent_test = accu_percent_test / (times * 1.0)
+
+	print("Train Accy %s" % accu_percent_train)
+	print("Test Accy %s" % accu_percent_test)
 
 # Analyse the model
 
@@ -204,7 +236,7 @@ def test_model(model):
 	accu_percent = compute_accuracy(features, labels, model) * 100
 	conf_mat = compute_confusion_matrix(features,labels,model);
 
-	print "Accuracy obtained over the whole training set is %0.4f %% ." % (accu_percent)
+	print "Accuracy using %s method obtained over the whole %s training set is %0.4f %% for actions %s" % (method, kind, accu_percent, actions)
 	print conf_mat
 
 	#print model.predict_proba([features[0]])
@@ -251,5 +283,7 @@ def constructor():
 if __name__ == "__main__":
 	method = default if len(sys.argv) == 1 else sys.argv[1]
 	global m; m = method
-	if full_test:
+	if ten_times:
+		ten_times(method, kind)
+	elif full_test:
 		analyse_model(method, kind)

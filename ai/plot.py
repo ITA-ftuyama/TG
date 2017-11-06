@@ -4,8 +4,8 @@ import matplotlib.pyplot as graph
 import os.path
 import sys
 
-is_spec = True
-default = "blink"
+is_spec = False
+default = "punchleft"
 
 # Function to read the features from file
 
@@ -28,20 +28,25 @@ def compute_plot(action, spectrum, raw):
   else:
     graph.plot(raw, color="darkRed")
     ax.set_xlim(xmax=len(raw))
-  ax.set_xlabel('Frequency (Hz)')
-  ax.set_ylabel('Amplitude (dB)')
   #ax.set_axisbelow(True)
   #ax.yaxis.grid(color='gray', linestyle='dashed')
   #ax.xaxis.grid(color='gray', linestyle='dashed')
   graph.legend(loc='upper left', numpoints = 1 )
-  graph.title("Mean Spectrum: %s" % action.title())
+  if is_spec:
+    ax.set_xlabel('Frequency (Hz)')
+    ax.set_ylabel('Amplitude (dB)')
+    graph.title("Mean Spectrum: %s" % action.title())
+  else:
+    ax.set_xlabel('Time (ms)')
+    ax.set_ylabel('Amplitude (10-8 V)')
+    graph.title("Sample Raw Data: %s" % action.title())
   graph.show()
   return;
 
 
 def filename(action, session):
   folder = "spec/" if is_spec else "raw/"
-  return "../app/records/" + folder + action + "_" + str(session) + ".txt"
+  return "../app/records/" + folder + action + "/" + action + "_" + str(session) + ".txt"
 
 # Starting of the flow of program
 
