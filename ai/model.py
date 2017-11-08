@@ -7,14 +7,14 @@ import random
 import skflow
 import sys
 
-kind = ["raw", "spec"][0]
+kind = ["raw", "spec"][1]
 default = ["svm", "k", "dnn"][0]
-actions = ["idle", "blink"]
+actions = ["idle", "blink", "punchleft", "punchright", "head"]
 n_sessions = 15
-ten_time = True
+ten_time 	= False
 full_test = True
 normalize = True
-times = 10
+times = 1
 
 # Function to read the features from file
 
@@ -48,6 +48,8 @@ def compute_SVC(train_f, train_l):
 
 def compute_DNN(train_f, train_l):
 	c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 20, 10], n_classes=len(actions), learning_rate=0.1, verbose=0)
+	#c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 30, 80, 80, 30, 10], n_classes=len(actions), learning_rate=0.08, verbose=0)
+	#c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 30, 90, 120, 90, 30, 10], n_classes=len(actions), learning_rate=0.08, verbose=0)
 	c.fit(cast(train_f), train_l)
 	return c
 
@@ -231,7 +233,7 @@ def analyse_training_percent(method, kind):
 
 # Test the generated model
 
-def test_model(model):
+def test_model(model, method):
 	global features, labels
 	accu_percent = compute_accuracy(features, labels, model) * 100
 	conf_mat = compute_confusion_matrix(features,labels,model);
@@ -271,7 +273,7 @@ def compute_model(method, f, l):
 def construct_model(method, kind):
 	read_input(kind)
 	model = compute_model(method, features, labels)
-	test_model(model)
+	test_model(model, method)
 	return model
 
 # Constructor
@@ -283,7 +285,9 @@ def constructor():
 if __name__ == "__main__":
 	method = default if len(sys.argv) == 1 else sys.argv[1]
 	global m; m = method
-	if ten_times:
+	if ten_time == True:
 		ten_times(method, kind)
-	elif full_test:
+	elif full_test == True:
 		analyse_model(method, kind)
+	#else:
+		#analyse_training_percent(method, kind)

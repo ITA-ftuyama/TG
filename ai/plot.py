@@ -4,8 +4,8 @@ import matplotlib.pyplot as graph
 import os.path
 import sys
 
-is_spec = False
-default = "punchleft"
+is_spec = True
+default = "head"
 
 # Function to read the features from file
 
