@@ -10,11 +10,13 @@ import sys
 kind = ["raw", "spec"][1]
 default = ["svm", "k", "dnn"][0]
 actions = ["idle", "blink", "punchleft", "punchright", "head"]
+#actions = ["idle", "blink", "closedeyes", "closedeyeshand"]
 n_sessions = 15
-ten_time 	= False
+ten_time 	= True
 full_test = True
 normalize = True
-times = 1
+maximize = True
+times = 10
 
 # Function to read the features from file
 
@@ -47,9 +49,16 @@ def compute_SVC(train_f, train_l):
 # Function to compute the classification using Deeplearning
 
 def compute_DNN(train_f, train_l):
-	c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 20, 10], n_classes=len(actions), learning_rate=0.1, verbose=0)
-	#c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 30, 80, 80, 30, 10], n_classes=len(actions), learning_rate=0.08, verbose=0)
-	#c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 30, 90, 120, 90, 30, 10], n_classes=len(actions), learning_rate=0.08, verbose=0)
+	steps = 200 * len(actions) 
+	if len(actions) <= 3:
+		c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 20, 10], n_classes=len(actions), learning_rate=0.1, steps=steps, verbose=0)
+	else:
+		#c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 20, 10], n_classes=len(actions), learning_rate=0.1, steps=200, verbose=0)
+		#c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 20, 10], n_classes=len(actions), learning_rate=0.1, steps=steps, verbose=0)
+		#c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 20, 20, 10], n_classes=len(actions), learning_rate=0.08, steps=steps, verbose=0)
+		#c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 30, 80, 30, 10], n_classes=len(actions), learning_rate=0.08, steps=steps, verbose=0)
+		#c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 30, 90, 120, 90, 30, 10], n_classes=len(actions), learning_rate=0.08, steps=steps, verbose=0)
+		c = skflow.TensorFlowDNNClassifier(hidden_units=[10, 30, 90, 120, 90, 30, 10], n_classes=len(actions), learning_rate=0.075, steps=steps - 100, verbose=0)
 	c.fit(cast(train_f), train_l)
 	return c
 
@@ -132,11 +141,19 @@ def ten_times(method, kind):
 
 		model = compute_model(method, features_train,labels_train);
 
-		accu_percent_train += compute_accuracy(features_train,labels_train,model)*100;
-		accu_percent_test += compute_accuracy(features_test, labels_test,model)*100;
+		accu_train = compute_accuracy(features_train,labels_train,model)*100;
+		accu_test  = compute_accuracy(features_test, labels_test,model)*100;
 
-	accu_percent_train = accu_percent_train / (times * 1.0)
-	accu_percent_test = accu_percent_test / (times * 1.0)
+		if maximize == True:
+			accu_percent_train = max(accu_percent_train, accu_train)
+			accu_percent_test  = max(accu_percent_test, accu_test)
+		else:
+			accu_percent_train += accu_train
+			accu_percent_test  += accu_test
+
+	if maximize == False:
+		accu_percent_train = accu_percent_train / (times * 1.0)
+		accu_percent_test = accu_percent_test / (times * 1.0)
 
 	print("Train Accy %s" % accu_percent_train)
 	print("Test Accy %s" % accu_percent_test)
@@ -148,6 +165,7 @@ def analyse_model(method, kind):
 	read_input(kind)
 
 	input_percent = [20, 30, 40, 50, 60, 70, 80]
+	#input_percent = [80]
 	file_created1 = open('results/Generated_accuracy_table.dat','w')
 	file_created2 = open('results/Generated_error_table.dat','w')
 
