@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1065</width>
+    <width>1067</width>
     <height>708</height>
    </rect>
   </property>
@@ -157,6 +157,14 @@
         </item>
         <item>
          <widget class="QLabel" name="intention_label">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <italic>true</italic>
+            <bold>true</bold>
+           </font>
+          </property>
           <property name="text">
            <string>intention</string>
           </property>

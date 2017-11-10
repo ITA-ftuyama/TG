@@ -26,6 +26,11 @@ class DataSerial:
             self.view.add_message(self.ser.readline(), "rser_data")
             time.sleep(1)
 
+    def send_action(self, action):
+        """Send action using serial."""
+        print "Serial action: %s" % action
+        self.ser.write(action)
+
     def send_ser(self, num):
         """Send number using serial."""
         y_string = self.string_number(num)

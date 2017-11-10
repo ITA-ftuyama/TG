@@ -7,7 +7,7 @@ from mindwave.pyeeg import bin_power
 from mindwave.parser import ThinkGearParser, TimeSeriesRecorder
 from mindwave.bluetooth_headset import BluetoothError
 from startup import mindwave_startup
-from controllers.controller import Controller
+from controllers.arm_controller import Controller
 from random import randint
 from numpy import *
 from view import View
@@ -27,7 +27,7 @@ def main():
     parser = ThinkGearParser(recorders=[recorder])
 
     view = View()
-    controller = Controller(view, 'led')
+    controller = Controller(view)
     socket, args = mindwave_startup(view=view, description="TEEG")
 
     mock = True
@@ -73,10 +73,9 @@ def main():
                     dt, data_spec = bin_power(recorder.raw[-512:], range(flen), 512)
                     action, proba = ai.predict(array([data_spec]))
                 view.print_action(action, proba)
-                #controller.send_action(action)
+                controller.send_action(action)
 
             view.print_waves(recorder)
-            controller.control(recorder)
 
             """if len(parser.current_vector)>7:
                 m = max(p.current_vector)

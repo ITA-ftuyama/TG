@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_win_plot(object):
     def setupUi(self, win_plot):
         win_plot.setObjectName(_fromUtf8("win_plot"))
-        win_plot.resize(1065, 708)
+        win_plot.resize(1067, 708)
         self.centralwidget = QtGui.QWidget(win_plot)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
@@ -102,6 +102,12 @@ class Ui_win_plot(object):
         self.label_10.setObjectName(_fromUtf8("label_10"))
         self.verticalLayout_6.addWidget(self.label_10)
         self.intention_label = QtGui.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setItalic(True)
+        font.setWeight(75)
+        self.intention_label.setFont(font)
         self.intention_label.setObjectName(_fromUtf8("intention_label"))
         self.verticalLayout_6.addWidget(self.intention_label)
         self.action_label = QtGui.QLabel(self.centralwidget)
