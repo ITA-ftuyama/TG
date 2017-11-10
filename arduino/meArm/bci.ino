@@ -71,10 +71,16 @@ void loop() {
       break;    
     case 'h':
       arm.gotoPointCylinder(theta, r, z - 1.0);
+      arm_moving = -1 * arm_moving;
+      if (arm_moving == 1)
+        arm_dir = -1 * arm_dir
       break;
     default:
     break;
   }
+
+  //if (arm_moving == 1)
+  //  arm.gotoPointCylinder(theta, r, z + arm_dir * 1.0);
 
 
   // Joystick control
