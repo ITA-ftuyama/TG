@@ -46,42 +46,44 @@ void setup() {
 
 void loop() {
   // BCI control
-  int action = Serial.read();
+  if (Serial.available() > 0) {
+    int action = Serial.read();
+  
+    float theta = arm.getTheta();
+    float r = arm.getR();
+    float z = arm.getZ();
 
-  float theta = arm.getTheta();
-  float r = arm.getR();
-  float z = arm.getZ();
-
-  switch (var) {
-    case 'i':
-      //do nothing
+    switch (action) {
+      case 'i':
+        1+1;
+        break;
+      case 'b':
+        if (gripper == -1)
+          arm.closeGripper();
+        else
+          arm.openGripper();  
+        gripper = -1 * gripper;
+        break;    
+      case 'l':
+        arm.gotoPointCylinder(theta + 0.4, r, z);
+        break;    
+      case 'r':
+        arm.gotoPointCylinder(theta - 0.2, r, z);
+        break;    
+      case 't':
+        arm.gotoPoint(arm.getX(), arm.getY(), z + 5.0 * arm_dir);
+        arm_moving = 1;
+        break;
+      default:
+        1+1;
       break;
-    case 'b':
-      if (gripper == -1)
-        arm.closeGripper();
-      else
-        arm.openGripper();  
-      gripper = -1 * gripper
-      break;    
-    case 'l':
-      arm.gotoPointCylinder(theta - 5.0, r, z);
-      break;    
-    case 'r':
-      arm.gotoPointCylinder(theta + 5.0, r, z);
-      break;    
-    case 'h':
-      arm.gotoPointCylinder(theta, r, z - 1.0);
-      arm_moving = -1 * arm_moving;
-      if (arm_moving == 1)
-        arm_dir = -1 * arm_dir
-      break;
-    default:
-    break;
+    }
+    
+    if (action != 't' && arm_moving == 1) {
+      arm_dir = -1 * arm_dir;
+      arm_moving = -1; 
+    }
   }
-
-  //if (arm_moving == 1)
-  //  arm.gotoPointCylinder(theta, r, z + arm_dir * 1.0);
-
 
   // Joystick control
   float dx = map(analogRead(xdirPin), 0, 1023, -5.0, 5.0);
@@ -100,5 +102,5 @@ void loop() {
   else if (dg > 3.0)
     arm.openGripper();  
 
-  delay(50);
+  delay(100);
 }

@@ -17,6 +17,7 @@ messages = {}
 actions = ['idle']
 action_msgs = ['idle 1.0']
 intention = 'idle 1.0'
+has_intention = False
 flen = 50
 
 # Recording opts
@@ -58,9 +59,10 @@ class View(object):
             messages[kind].pop(0)
 
     def print_action(self, action, proba):
-        global actions, intention
+        global actions, intention, has_intention
         intention = action + " %.2f" % proba
-        if proba > 0.5 and action != actions[-1]:
+        has_intention = (proba > 0.6 and action != actions[-1])
+        if has_intention:
             actions.append(action)
             action_msgs.append(action + " %.2f" % proba)
 
@@ -148,7 +150,7 @@ class Screen(object):
         sys.exit(self.app.exec_())
 
     def plot(self):
-        global ys, over, spectrum, flen, rec_start, recorder_size
+        global ys, over, spectrum, has_intention, flen, rec_start, recorder_size
         #ys=numpy.roll(ys,-1)
 
         # Real time EEG
@@ -166,6 +168,12 @@ class Screen(object):
             self.uiplot.progressBar.setValue(int(numpy.mean(lvl[0][-50:])))
             self.uiplot.progressBar_2.setValue(int(numpy.mean(lvl[1][-50:])))
             self.uiplot.progressBar_3.setValue(int(numpy.mean(lvl[2][-50:])))
+
+        # Intention color
+        if has_intention:
+            self.uiplot.intention_label.setStyleSheet('color: red')
+        else:
+            self.uiplot.intention_label.setStyleSheet('color: blue')
 
         # Recording info
         if record:

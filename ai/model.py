@@ -9,9 +9,11 @@ import sys
 
 kind = ["raw", "spec"][1]
 default = ["svm", "k", "dnn"][0]
-actions = ["idle", "blink", "punchleft", "punchright", "head"]
+#actions = ["idle", "tooth"]
+#actions = ["idle", "blink", "tooth"]
+actions = ["idle", "blink", "punchleft", "punchright", "tooth"]
 #actions = ["idle", "blink", "closedeyes", "closedeyeshand"]
-n_sessions = 15
+n_sessions = 17
 ten_time 	= True
 full_test = True
 normalize = True

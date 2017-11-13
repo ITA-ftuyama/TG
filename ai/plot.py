@@ -5,7 +5,7 @@ import os.path
 import sys
 
 is_spec = True
-default = "head"
+default = "tooth"
 
 # Function to read the features from file
 

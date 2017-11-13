@@ -35,6 +35,7 @@ def main():
     spectrum_mean = False
     prediction = True
     iteration = 0
+    last_action = None
 
     while view.screen.quit is False:   
         try:
@@ -68,12 +69,18 @@ def main():
 
             if prediction and len(recorder.raw) >= 1024 and iteration % 5 == 0:
                 if ai.kind == "raw":
-                    action, proba = ai.predict(array([array(recorder.raw[-1024:], dtype=float32)]))
+                    action, proba = ai.predict(array([array(recorder.raw[-512:], dtype=float32)]))
                 else:
                     dt, data_spec = bin_power(recorder.raw[-512:], range(flen), 512)
                     action, proba = ai.predict(array([data_spec]))
                 view.print_action(action, proba)
-                controller.send_action(action)
+
+                if proba > 0.6 and (action != last_action or action == "tooth"):
+                    controller.send_action(action)
+                    last_action = action
+                elif proba > 0.5 and action != last_action and action == "punchleft":
+                    controller.send_action(action)
+                    last_action = action
 
             view.print_waves(recorder)
 

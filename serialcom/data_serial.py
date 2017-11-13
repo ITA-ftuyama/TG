@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python
 """Sending mouse position."""
+import serial.tools.list_ports
 import serial
 import time
 
@@ -10,14 +11,21 @@ class DataSerial:
     """Serial communication."""
     limit = 50
 
-    def __init__(self, view, port):
+    def __init__(self, view):
         """Initialize serial."""
+        self.ser = None
         try:
             self.view = view
-            self.ser = serial.Serial(port, 9600, timeout=0)
-            self.view.print_message("Connected to serial " + port, "serial")
+            ports = list(serial.tools.list_ports.comports())
+            for p in ports:
+              if "ttyACM0" in p.description:
+                self.ser = serial.Serial(p[0], 9600, timeout=0)
+                self.view.print_message("Connected to serial " + p[0], "serial")
+                
+            if self.ser == None:
+              raise Exception
         except Exception as e:
-            self.ser = None
+            print e
             self.view.print_message("Could not connect to serial", "serial")
 
     def read_ser(self):
@@ -28,7 +36,7 @@ class DataSerial:
 
     def send_action(self, action):
         """Send action using serial."""
-        print "Serial action: %s" % action
+        #print "Serial action: %s" % action
         self.ser.write(action)
 
     def send_ser(self, num):
